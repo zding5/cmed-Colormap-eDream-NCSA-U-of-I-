@@ -1,0 +1,178 @@
+# data file for the Fltk User Interface Designer (fluid)
+version 1.0303 
+header_name {.H} 
+code_name {.C}
+decl {\#include "cmed.H"} {private local
+} 
+
+Function {make_window()} {open
+} {
+  Fl_Window {} {open
+    xywh {435 271 405 605} type Double resizable visible
+  } {
+    Fl_Button undobutton {
+      label Undo
+      callback undo_cb
+      xywh {6 25 40 25} down_box DOWN_BOX
+    }
+    Fl_Slider forceslider {
+      label Force
+      callback lerp_cb
+      xywh {206 25 75 25} type {Horz Knob} selection_color 1 align 8 minimum 0.05 value 0.5
+    }
+    Fl_Button rgbmode {
+      label HSB
+      callback rgbmode_cb
+      xywh {331 25 35 25} labelsize 12 align 16
+    }
+    Fl_Input fnamebox {
+      label {File:}
+      callback input_cb
+      xywh {31 60 355 25} labeltype ENGRAVED_LABEL labelsize 12 when 10
+    }
+    Fl_Box {cshow.hsblbls[0]} {
+      label {Hue (L)}
+      xywh {30 219 80 20} box FLAT_BOX color 34 labelfont 1 labelsize 12 labelcolor 3
+    }
+    Fl_Box {cshow.hsblbls[1]} {
+      label {Sat(M)}
+      xywh {115 219 75 20} box FLAT_BOX color 34 labelfont 1 labelsize 12 labelcolor 2
+    }
+    Fl_Box {cshow.hsblbls[2]} {
+      label {Bright(R)}
+      xywh {195 219 75 20} box FLAT_BOX color 34 labelfont 1 labelsize 12 labelcolor 235
+    }
+    Fl_Box {} {
+      label {Alpha(shift)}
+      xywh {275 219 80 20} box FLAT_BOX color 34 labelfont 1 labelsize 12 labelcolor 7
+    }
+    Fl_Box cmedit {
+      xywh {5 239 380 270} box FLAT_BOX resizable
+      class {class CMedit}
+    }
+    Fl_Box {cshow.color} {
+      xywh {62 515 50 40} box DOWN_BOX labeltype NO_LABEL
+      class colorpatch
+    }
+    Fl_Value_Input {cshow.cindex} {
+      label {  (index}
+      callback report_cb
+      xywh {7 530 50 25} box FLAT_BOX color 16 align 1 maximum 0 step 1 textsize 12
+    }
+    Fl_Output {cshow.hsba} {
+      label HSBA
+      xywh {117 530 120 25} box FLAT_BOX color 16 align 1 textsize 11
+    }
+    Fl_Output {cshow.rgba} {
+      label rgb
+      xywh {247 530 125 25} box FLAT_BOX color 16 align 1 textsize 11
+    }
+    Fl_Value_Input {cshow.postscalein} {
+      label {* Amax}
+      callback ascale_cb
+      xywh {317 570 65 25} align 5
+    }
+    Fl_Value_Input {cshow.postexponin} {
+      label {**  expon  )}
+      callback ascale_cb
+      xywh {237 570 75 25} align 5
+    }
+    Fl_Value_Input {cshow.cmentin} {
+      label cmapsize
+      callback ncment_cb
+      xywh {7 570 55 25} box ENGRAVED_BOX color 25 align 5 when 4
+    }
+    Fl_Output {cshow.scaleout} {
+      label {  Aout  =  ( Ain}
+      xywh {137 570 95 25} box FLAT_BOX color 16 align 5
+    }
+    Fl_Menu_Bar {} {open
+      xywh {0 0 405 20} color 46
+    } {
+      Submenu menu_file {
+        label {&File} open
+        xywh {0 0 70 21}
+      } {
+        MenuItem save_color_file {
+          label {Save Color File... }
+          callback menu_fsave_cb
+          xywh {0 0 36 21} shortcut 0x40073
+        }
+        MenuItem load_color_file {
+          label {Load Color File...}
+          callback menu_fload_cb
+          xywh {0 0 36 21} shortcut 0x4006c
+        }
+        MenuItem {} {
+          label {load histogram file...}
+          callback menu_histfload_cb
+          xywh {0 0 36 21} shortcut 0x5006c
+        }
+      }
+      Submenu {} {
+        label {&Edit} open
+        xywh {0 0 70 21}
+      } {
+        MenuItem menu_undo {
+          label Undo
+          callback menu_undo_cb
+          xywh {0 0 36 21} shortcut 0x4007a
+        }
+      }
+    }
+    Fl_Group {} {open selected
+      xywh {5 86 400 154}
+    } {
+      Fl_Group {} {open
+        xywh {10 86 380 118}
+      } {
+        Fl_Value_Input cmap_min {
+          label {Cmap Range:   Min}
+          callback cmap_range_min
+          xywh {151 124 89 25} when 4
+        }
+        Fl_Value_Input cmap_max {
+          label Max
+          callback cmap_range_max
+          xywh {290 124 95 25} when 4 value 1
+        }
+        Fl_Value_Input display_range_min {
+          label {Display Range: Min}
+          callback display_data_range_min
+          xywh {151 154 89 25} when 4
+        }
+        Fl_Value_Input display_range_max {
+          label Max
+          callback display_data_range_max
+          xywh {290 154 95 25} when 4 value 1
+        }
+        Fl_Output hist_max {
+          label Max
+          xywh {290 95 95 25} color 31
+        }
+        Fl_Output hist_min {
+          label {Hist Range:    Min}
+          xywh {151 95 89 25} color 31 selection_color 7
+        }
+        Fl_Slider x_range_min_slider {
+          callback x_range_min_cb
+          xywh {125 181 115 19} type {Horz Knob} align 4
+        }
+        Fl_Slider x_range_max_slider {
+          callback x_range_max_cb
+          xywh {265 182 120 18} type {Horz Knob}
+        }
+      }
+      Fl_Box {} {
+        xywh {390 98 5 84} resizable
+      }
+    }
+    Fl_Value_Input max_Y {
+      label {Max Y: }
+      xywh {360 218 40 21} align 1
+    }
+  }
+} 
+
+class UserInterface {open
+} {} 

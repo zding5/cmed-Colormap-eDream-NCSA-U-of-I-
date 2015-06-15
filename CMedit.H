@@ -93,7 +93,6 @@ int histfload( FILE *inf );
 
 float get_data_x_min_for_display();
 float get_data_x_max_for_display();
-float get_data_y_max_for_display();
 float get_hist_data_x_min();
 float get_hist_data_x_max();
 float get_data_x_min_for_cmap();
@@ -101,12 +100,24 @@ float get_data_x_max_for_cmap();
 
 void set_data_x_min_for_display(float val);
 void set_data_x_max_for_display(float val);
-void set_data_y_max_for_display(float val);
 void set_hist_data_x_min(float val);
 void set_hist_data_x_max(float val);
 void set_data_x_min_for_cmap(float val);
 void set_data_x_max_for_cmap(float val);
 
+float get_data_y_min_for_display();
+float get_data_y_max_for_display();
+float get_hist_data_y_min();
+float get_hist_data_y_max();
+float get_data_y_min_for_cmap();
+float get_data_y_max_for_cmap();
+
+void set_data_y_min_for_display(float val);
+void set_data_y_max_for_display(float val);
+void set_hist_data_y_min(float val);
+void set_hist_data_y_max(float val);
+void set_data_y_min_for_cmap(float val);
+void set_data_y_max_for_cmap(float val);
 //*****Public new Coords END
 
 void range_update_to( void(*func)( CMedit *cm ) );
@@ -121,7 +132,7 @@ protected:
 
 //**Protected Histogram stuffs
 
-  int hist_x_num_; //number of histogram entries and the entries are 0 to N
+  //int hist_x_num_; //number of histogram entries and the entries are 0 to N
   int data_point_num_;
   float *hist_ent_arr;
 
@@ -131,8 +142,7 @@ protected:
 
 //**Protected Coordinates Stuffs
 
-  // float hist_x_min_;
-  // float hist_x_max_;
+  float cmap_y_max_;
 
   float data_x_min_for_display_;
   float data_x_max_for_display_;
@@ -146,6 +156,8 @@ protected:
 
   float data_x_min_for_cmap_;
   float data_x_max_for_cmap_;
+  float data_y_min_for_cmap_;
+  float data_y_max_for_cmap_;
 
 //**end Protected Coordinates Stuffs
 
@@ -164,6 +176,7 @@ protected:
 
 //windows to drawing
 float wx2drx( int wx );
+float wy2dry( int wy );
 
 //data to drawing
 float dtx2drx( float dtx );
@@ -174,9 +187,11 @@ float drx2dtx( float drx );
 
 //histogram to data
 float histx2dtx( int histx );
+float histy2dty( int histy );
 
 //colormap to data
 float cmapx2dtx( int cmapx );
+float cmapy2dty( int cmapy );
 
 //data to colormap
 int dtx2cmapx( float dtx );
@@ -208,13 +223,18 @@ float hist_y_scaler( float dty );
   void init() {
     data_x_min_for_display_ = 0.0;
     data_x_max_for_display_ = 1.0;
+    data_y_min_for_display_ = 0.0;
     data_y_max_for_display_ = 1.0;
 
     hist_data_x_min_ = 0.0;
     hist_data_x_max_ = 1.0;
+    hist_data_y_min_ = 0.0;
+    hist_data_y_max_ = 1.0;
 
     data_x_min_for_cmap_ = 0.0;
     data_x_max_for_cmap_ = 1.0;
+    data_y_min_for_cmap_ = 0.0;
+    data_y_max_for_cmap_ = 1.0;
 
     // hist_x_num_ = 100;
 

@@ -22,30 +22,15 @@ Fl_Menu_Item menu_[] = {
  {"&Edit", 0,  0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
  {"Undo", 0x4007a,  (Fl_Callback*)menu_undo_cb, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {0,0,0,0,0,0,0,0,0},
+ {"&Zoom", 0,  0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Zoom Panel", 0,  (Fl_Callback*)zoom_panel_cb, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {0,0,0,0,0,0,0,0,0},
  {0,0,0,0,0,0,0,0,0}
 };
 
-Fl_Value_Input *cmap_min=(Fl_Value_Input *)0;
-
-Fl_Value_Input *cmap_max=(Fl_Value_Input *)0;
-
-Fl_Value_Input *display_range_min=(Fl_Value_Input *)0;
-
-Fl_Value_Input *display_range_max=(Fl_Value_Input *)0;
-
-Fl_Output *hist_max=(Fl_Output *)0;
-
-Fl_Output *hist_min=(Fl_Output *)0;
-
-Fl_Slider *x_range_min_slider=(Fl_Slider *)0;
-
-Fl_Slider *x_range_max_slider=(Fl_Slider *)0;
-
-Fl_Value_Input *max_Y=(Fl_Value_Input *)0;
-
 Fl_Double_Window* make_window() {
   Fl_Double_Window* w;
-  { Fl_Double_Window* o = new Fl_Double_Window(405, 605);
+  { Fl_Double_Window* o = new Fl_Double_Window(400, 605);
     w = o;
     { undobutton = new Fl_Button(6, 25, 40, 25, "Undo");
       undobutton->down_box(FL_DOWN_BOX);
@@ -162,57 +147,149 @@ Fl_Double_Window* make_window() {
       cshow.scaleout->color((Fl_Color)16);
       cshow.scaleout->align(Fl_Align(FL_ALIGN_TOP_LEFT));
     } // Fl_Output* cshow.scaleout
-    { Fl_Menu_Bar* o = new Fl_Menu_Bar(0, 0, 405, 20);
+    { Fl_Menu_Bar* o = new Fl_Menu_Bar(0, 0, 400, 20);
       o->color((Fl_Color)46);
       o->menu(menu_);
     } // Fl_Menu_Bar* o
-    { Fl_Group* o = new Fl_Group(5, 86, 400, 154);
-      { Fl_Group* o = new Fl_Group(10, 86, 380, 118);
-        { cmap_min = new Fl_Value_Input(151, 124, 89, 25, "Cmap Range:   Min");
-          cmap_min->callback((Fl_Callback*)cmap_range_min);
-          cmap_min->when(FL_WHEN_RELEASE);
-        } // Fl_Value_Input* cmap_min
-        { cmap_max = new Fl_Value_Input(290, 124, 95, 25, "Max");
-          cmap_max->value(1);
-          cmap_max->callback((Fl_Callback*)cmap_range_max);
-          cmap_max->when(FL_WHEN_RELEASE);
-        } // Fl_Value_Input* cmap_max
-        { display_range_min = new Fl_Value_Input(151, 154, 89, 25, "Display Range: Min");
-          display_range_min->callback((Fl_Callback*)display_data_range_min);
-          display_range_min->when(FL_WHEN_RELEASE);
-        } // Fl_Value_Input* display_range_min
-        { display_range_max = new Fl_Value_Input(290, 154, 95, 25, "Max");
-          display_range_max->value(1);
-          display_range_max->callback((Fl_Callback*)display_data_range_max);
-          display_range_max->when(FL_WHEN_RELEASE);
-        } // Fl_Value_Input* display_range_max
-        { hist_max = new Fl_Output(290, 95, 95, 25, "Max");
-          hist_max->color((Fl_Color)31);
-        } // Fl_Output* hist_max
-        { hist_min = new Fl_Output(151, 95, 89, 25, "Hist Range:    Min");
-          hist_min->color((Fl_Color)31);
-          hist_min->selection_color(FL_BACKGROUND2_COLOR);
-        } // Fl_Output* hist_min
-        { x_range_min_slider = new Fl_Slider(125, 181, 115, 19);
-          x_range_min_slider->type(5);
-          x_range_min_slider->callback((Fl_Callback*)x_range_min_cb);
-          x_range_min_slider->align(Fl_Align(FL_ALIGN_LEFT));
-        } // Fl_Slider* x_range_min_slider
-        { x_range_max_slider = new Fl_Slider(265, 182, 120, 18);
-          x_range_max_slider->type(5);
-          x_range_max_slider->callback((Fl_Callback*)x_range_max_cb);
-        } // Fl_Slider* x_range_max_slider
+    o->end();
+  } // Fl_Double_Window* o
+  return w;
+}
+
+Fl_Double_Window *zoom_panel_window=(Fl_Double_Window *)0;
+
+Fl_Value_Input *x_cmap_range_min_box=(Fl_Value_Input *)0;
+
+Fl_Value_Input *x_cmap_range_max_box=(Fl_Value_Input *)0;
+
+Fl_Value_Input *x_display_range_min_box=(Fl_Value_Input *)0;
+
+Fl_Value_Input *x_display_range_max_box=(Fl_Value_Input *)0;
+
+Fl_Output *x_hist_range_max_box=(Fl_Output *)0;
+
+Fl_Output *x_hist_range_min_box=(Fl_Output *)0;
+
+Fl_Slider *x_display_range_min_slider=(Fl_Slider *)0;
+
+Fl_Slider *x_display_range_max_slider=(Fl_Slider *)0;
+
+Fl_Output *y_hist_range_max_box=(Fl_Output *)0;
+
+Fl_Output *y_hist_range_min_box=(Fl_Output *)0;
+
+Fl_Value_Input *y_cmap_range_max_box=(Fl_Value_Input *)0;
+
+Fl_Value_Input *y_cmap_range_min_box=(Fl_Value_Input *)0;
+
+Fl_Value_Input *y_display_range_max_box=(Fl_Value_Input *)0;
+
+Fl_Value_Input *y_display_range_min_box=(Fl_Value_Input *)0;
+
+Fl_Slider *y_cmap_range_max_slider=(Fl_Slider *)0;
+
+Fl_Slider *y_display_range_min_slider=(Fl_Slider *)0;
+
+Fl_Slider *y_cmap_range_min_slider=(Fl_Slider *)0;
+
+Fl_Slider *y_display_range_max_slider=(Fl_Slider *)0;
+
+Fl_Double_Window* make_zoom_panel() {
+  { zoom_panel_window = new Fl_Double_Window(670, 490, "Zoom Panel Window");
+    { Fl_Group* o = new Fl_Group(0, 6, 417, 148);
+      o->box(FL_UP_BOX);
+      o->color((Fl_Color)92);
+      { Fl_Group* o = new Fl_Group(22, 6, 380, 118);
+        { x_cmap_range_min_box = new Fl_Value_Input(163, 44, 89, 25, "Cmap Range(X):   Min");
+          x_cmap_range_min_box->callback((Fl_Callback*)x_cmap_range_min_box_cb);
+          x_cmap_range_min_box->when(FL_WHEN_RELEASE);
+        } // Fl_Value_Input* x_cmap_range_min_box
+        { x_cmap_range_max_box = new Fl_Value_Input(302, 44, 95, 25, "Max");
+          x_cmap_range_max_box->value(1);
+          x_cmap_range_max_box->callback((Fl_Callback*)x_cmap_range_max_box_cb);
+          x_cmap_range_max_box->when(FL_WHEN_RELEASE);
+        } // Fl_Value_Input* x_cmap_range_max_box
+        { x_display_range_min_box = new Fl_Value_Input(163, 74, 89, 25, "Display Range(X): Min");
+          x_display_range_min_box->callback((Fl_Callback*)x_display_range_min_box_cb);
+          x_display_range_min_box->when(FL_WHEN_RELEASE);
+        } // Fl_Value_Input* x_display_range_min_box
+        { x_display_range_max_box = new Fl_Value_Input(302, 74, 95, 25, "Max");
+          x_display_range_max_box->value(1);
+          x_display_range_max_box->callback((Fl_Callback*)x_display_range_max_box_cb);
+          x_display_range_max_box->when(FL_WHEN_RELEASE);
+        } // Fl_Value_Input* x_display_range_max_box
+        { x_hist_range_max_box = new Fl_Output(302, 15, 95, 25, "Max");
+          x_hist_range_max_box->color((Fl_Color)31);
+        } // Fl_Output* x_hist_range_max_box
+        { x_hist_range_min_box = new Fl_Output(163, 15, 89, 25, "Hist Range(X):    Min");
+          x_hist_range_min_box->color((Fl_Color)31);
+          x_hist_range_min_box->selection_color(FL_BACKGROUND2_COLOR);
+        } // Fl_Output* x_hist_range_min_box
+        { x_display_range_min_slider = new Fl_Slider(137, 101, 115, 19);
+          x_display_range_min_slider->type(5);
+          x_display_range_min_slider->callback((Fl_Callback*)x_display_range_min_slider_cb);
+          x_display_range_min_slider->align(Fl_Align(FL_ALIGN_LEFT));
+        } // Fl_Slider* x_display_range_min_slider
+        { Fl_Slider* o = x_display_range_max_slider = new Fl_Slider(277, 102, 120, 18);
+          x_display_range_max_slider->type(5);
+          x_display_range_max_slider->callback((Fl_Callback*)x_display_range_max_slider_cb);
+          o->value(o->maximum());
+        } // Fl_Slider* x_display_range_max_slider
         o->end();
       } // Fl_Group* o
-      { Fl_Box* o = new Fl_Box(390, 98, 5, 84);
+      { Fl_Box* o = new Fl_Box(402, 18, 5, 84);
         Fl_Group::current()->resizable(o);
       } // Fl_Box* o
       o->end();
     } // Fl_Group* o
-    { max_Y = new Fl_Value_Input(360, 218, 40, 21, "Max Y: ");
-      max_Y->align(Fl_Align(FL_ALIGN_TOP));
-    } // Fl_Value_Input* max_Y
-    o->end();
-  } // Fl_Double_Window* o
-  return w;
+    { Fl_Group* o = new Fl_Group(420, 5, 245, 455);
+      o->box(FL_UP_BOX);
+      o->color((Fl_Color)214);
+      { y_hist_range_max_box = new Fl_Output(562, 12, 93, 25, "Hist Range(Y) Max:");
+        y_hist_range_max_box->color(FL_DARK1);
+        y_hist_range_max_box->callback((Fl_Callback*)y_hist_range_max_box_cf);
+      } // Fl_Output* y_hist_range_max_box
+      { y_hist_range_min_box = new Fl_Output(517, 421, 95, 25, "Min:");
+        y_hist_range_min_box->color((Fl_Color)46);
+        y_hist_range_min_box->callback((Fl_Callback*)y_hist_range_min_box_cf);
+      } // Fl_Output* y_hist_range_min_box
+      { y_cmap_range_max_box = new Fl_Value_Input(446, 88, 70, 20, "Cmap Range(Y) \nMax:");
+        y_cmap_range_max_box->callback((Fl_Callback*)y_cmap_range_max_box_cb);
+        y_cmap_range_max_box->align(Fl_Align(FL_ALIGN_TOP));
+      } // Fl_Value_Input* y_cmap_range_max_box
+      { y_cmap_range_min_box = new Fl_Value_Input(446, 372, 70, 20, "Min:");
+        y_cmap_range_min_box->callback((Fl_Callback*)y_cmap_range_min_box_cb);
+        y_cmap_range_min_box->align(Fl_Align(FL_ALIGN_TOP));
+      } // Fl_Value_Input* y_cmap_range_min_box
+      { y_display_range_max_box = new Fl_Value_Input(565, 88, 72, 19, "Display Range(Y)\nMax:");
+        y_display_range_max_box->callback((Fl_Callback*)y_display_range_max_box_cb);
+        y_display_range_max_box->align(Fl_Align(FL_ALIGN_TOP));
+      } // Fl_Value_Input* y_display_range_max_box
+      { y_display_range_min_box = new Fl_Value_Input(565, 371, 72, 19, "Min:");
+        y_display_range_min_box->callback((Fl_Callback*)y_display_range_min_box_cb);
+        y_display_range_min_box->align(Fl_Align(FL_ALIGN_TOP));
+      } // Fl_Value_Input* y_display_range_min_box
+      { y_cmap_range_max_slider = new Fl_Slider(470, 122, 20, 98);
+        y_cmap_range_max_slider->type(4);
+        y_cmap_range_max_slider->callback((Fl_Callback*)y_cmap_range_max_slider_cb);
+      } // Fl_Slider* y_cmap_range_max_slider
+      { Fl_Slider* o = y_display_range_min_slider = new Fl_Slider(590, 234, 20, 98);
+        y_display_range_min_slider->type(4);
+        y_display_range_min_slider->callback((Fl_Callback*)y_display_range_min_slider_cb);
+        o->value(o->minimum());
+      } // Fl_Slider* y_display_range_min_slider
+      { Fl_Slider* o = y_cmap_range_min_slider = new Fl_Slider(470, 235, 20, 98);
+        y_cmap_range_min_slider->type(4);
+        y_cmap_range_min_slider->callback((Fl_Callback*)y_cmap_range_min_slider_cb);
+        o->value(o->minimum());
+      } // Fl_Slider* y_cmap_range_min_slider
+      { y_display_range_max_slider = new Fl_Slider(590, 120, 20, 98);
+        y_display_range_max_slider->type(4);
+        y_display_range_max_slider->callback((Fl_Callback*)y_display_range_max_slider_cb);
+      } // Fl_Slider* y_display_range_max_slider
+      o->end();
+    } // Fl_Group* o
+    zoom_panel_window->end();
+  } // Fl_Double_Window* zoom_panel_window
+  return zoom_panel_window;
 }

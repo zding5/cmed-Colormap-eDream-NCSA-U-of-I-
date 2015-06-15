@@ -27,29 +27,52 @@ extern void menu_fsave_cb(Fl_Menu_*, void*);
 extern void menu_fload_cb(Fl_Menu_*, void*);
 extern void menu_histfload_cb(Fl_Menu_*, void*);
 extern void menu_undo_cb(Fl_Menu_*, void*);
-#include <FL/Fl_Group.H>
-extern void cmap_range_min(Fl_Value_Input*, void*);
-extern Fl_Value_Input *cmap_min;
-extern void cmap_range_max(Fl_Value_Input*, void*);
-extern Fl_Value_Input *cmap_max;
-extern void display_data_range_min(Fl_Value_Input*, void*);
-extern Fl_Value_Input *display_range_min;
-extern void display_data_range_max(Fl_Value_Input*, void*);
-extern Fl_Value_Input *display_range_max;
-extern Fl_Output *hist_max;
-extern Fl_Output *hist_min;
-extern void x_range_min_cb(Fl_Slider*, void*);
-extern Fl_Slider *x_range_min_slider;
-extern void x_range_max_cb(Fl_Slider*, void*);
-extern Fl_Slider *x_range_max_slider;
-extern Fl_Value_Input *max_Y;
+extern void zoom_panel_cb(Fl_Menu_*, void*);
 Fl_Double_Window* make_window();
 extern Fl_Menu_Item menu_[];
 #define menu_file (menu_+0)
 #define save_color_file (menu_+1)
 #define load_color_file (menu_+2)
 #define menu_undo (menu_+6)
+#define zoom_panel (menu_+9)
 
 class UserInterface {
 };
+extern Fl_Double_Window *zoom_panel_window;
+#include <FL/Fl_Group.H>
+extern void x_cmap_range_min_box_cb(Fl_Value_Input*, void*);
+extern Fl_Value_Input *x_cmap_range_min_box;
+extern void x_cmap_range_max_box_cb(Fl_Value_Input*, void*);
+extern Fl_Value_Input *x_cmap_range_max_box;
+extern void x_display_range_min_box_cb(Fl_Value_Input*, void*);
+extern Fl_Value_Input *x_display_range_min_box;
+extern void x_display_range_max_box_cb(Fl_Value_Input*, void*);
+extern Fl_Value_Input *x_display_range_max_box;
+extern Fl_Output *x_hist_range_max_box;
+extern Fl_Output *x_hist_range_min_box;
+extern void x_display_range_min_slider_cb(Fl_Slider*, void*);
+extern Fl_Slider *x_display_range_min_slider;
+extern void x_display_range_max_slider_cb(Fl_Slider*, void*);
+extern Fl_Slider *x_display_range_max_slider;
+extern void y_hist_range_max_box_cf(Fl_Output*, void*);
+extern Fl_Output *y_hist_range_max_box;
+extern void y_hist_range_min_box_cf(Fl_Output*, void*);
+extern Fl_Output *y_hist_range_min_box;
+extern void y_cmap_range_max_box_cb(Fl_Value_Input*, void*);
+extern Fl_Value_Input *y_cmap_range_max_box;
+extern void y_cmap_range_min_box_cb(Fl_Value_Input*, void*);
+extern Fl_Value_Input *y_cmap_range_min_box;
+extern void y_display_range_max_box_cb(Fl_Value_Input*, void*);
+extern Fl_Value_Input *y_display_range_max_box;
+extern void y_display_range_min_box_cb(Fl_Value_Input*, void*);
+extern Fl_Value_Input *y_display_range_min_box;
+extern void y_cmap_range_max_slider_cb(Fl_Slider*, void*);
+extern Fl_Slider *y_cmap_range_max_slider;
+extern void y_display_range_min_slider_cb(Fl_Slider*, void*);
+extern Fl_Slider *y_display_range_min_slider;
+extern void y_cmap_range_min_slider_cb(Fl_Slider*, void*);
+extern Fl_Slider *y_cmap_range_min_slider;
+extern void y_display_range_max_slider_cb(Fl_Slider*, void*);
+extern Fl_Slider *y_display_range_max_slider;
+Fl_Double_Window* make_zoom_panel();
 #endif

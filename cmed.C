@@ -244,7 +244,7 @@ void menu_histfload_cb( Fl_Menu_*, void*) {
 
 //*****END This is for range changes
 
-void hist_data_range_min(Fl_Output* op, void*) {
+void x_hist_range_min_box_cf(Fl_Output* op, void*) {
   float hist_min_val = cmedit->get_hist_data_x_min();
   char str[32];
   sprintf(str, "%g", hist_min_val);
@@ -252,49 +252,137 @@ void hist_data_range_min(Fl_Output* op, void*) {
 
 }
 
-void hist_data_range_max(Fl_Output* op, void*) {
+void x_hist_range_max_box_cf(Fl_Output* op, void*) {
   float hist_max_val = cmedit->get_hist_data_x_max();
   char str[32];
   sprintf(str, "%g", hist_max_val);
   op->value(str);
 }
 
-void cmap_range_min(Fl_Value_Input* inp, void*) {
+void y_hist_range_max_box_cf(Fl_Output* op, void*) {
+  float hist_max_val = cmedit->get_hist_data_y_max();
+  char str[32];
+  sprintf(str, "%g", hist_max_val);
+  op->value(str);
+}
+
+void y_hist_range_min_box_cf(Fl_Output* op, void*) {
+  float hist_min_val = cmedit->get_hist_data_y_min();
+  char str[32];
+  sprintf(str, "%g", hist_min_val);
+  op->value(str);
+}
+
+void x_cmap_range_min_box_cb(Fl_Value_Input* inp, void*) {
   cmedit->set_data_x_min_for_cmap(inp->value());
   cmedit->redraw();
 }
 
-void cmap_range_max(Fl_Value_Input* inp, void*) {
+void x_cmap_range_max_box_cb(Fl_Value_Input* inp, void*) {
   cmedit->set_data_x_max_for_cmap(inp->value());
   cmedit->redraw();
 }
 
-void display_data_range_min(Fl_Value_Input* inp, void*) {
+void y_cmap_range_max_box_cb(Fl_Value_Input* inp, void*) {
+  cmedit->set_data_y_max_for_cmap(inp->value());
+  cmedit->redraw();
+}
+
+void y_cmap_range_min_box_cb(Fl_Value_Input* inp, void*) {
+  cmedit->set_data_y_min_for_cmap(inp->value());
+  cmedit->redraw();
+}
+
+void x_display_range_min_box_cb(Fl_Value_Input* inp, void*) {
   cmedit->set_data_x_min_for_display(inp->value());
   cmedit->redraw();
 }
 
-void display_data_range_max(Fl_Value_Input* inp, void*) {
+void x_display_range_max_box_cb(Fl_Value_Input* inp, void*) {
   cmedit->set_data_x_max_for_display(inp->value());
   cmedit->redraw();
 }
 
-void R_updater (CMedit* cm) {
-  hist_data_range_min(hist_min, NULL);
-  hist_data_range_max(hist_max, NULL);
+void y_display_range_max_box_cb(Fl_Value_Input* inp, void*) {
+  cmedit->set_data_y_max_for_display(inp->value());
+  cmedit->redraw();
 }
 
-void x_range_min_cb(Fl_Slider* fl, void*) {
+void y_display_range_min_box_cb(Fl_Value_Input* inp, void*) {
+  cmedit->set_data_y_min_for_display(inp->value());
+  cmedit->redraw();
+}
+
+void x_display_range_min_slider_cb(Fl_Slider* fl, void*) {
   fl->bounds(cmedit->get_hist_data_x_min(), (cmedit->get_hist_data_x_max() - cmedit->get_hist_data_x_min()) / 2);
   cmedit->set_data_x_min_for_display(fl->value());
+  x_display_range_min_box->value(fl->value());
   cmedit->redraw();
 }
 
-void x_range_max_cb(Fl_Slider* fl, void*) {
-  fl->bounds((cmedit->get_hist_data_x_max() - cmedit->get_hist_data_x_min()) / 2, cmedit->get_hist_data_x_max());
+void x_display_range_max_slider_cb(Fl_Slider* fl, void*) {
+  fl->bounds( (cmedit->get_hist_data_x_max() - cmedit->get_hist_data_x_min()) / 2, cmedit->get_hist_data_x_max() );
   cmedit->set_data_x_max_for_display(fl->value());
+  x_display_range_max_box->value(fl->value());
   cmedit->redraw();
 }
+
+void y_cmap_range_max_slider_cb(Fl_Slider* fl, void*) {
+  fl->bounds( cmedit->get_hist_data_y_max(),(cmedit->get_hist_data_y_max() - cmedit->get_data_y_min_for_cmap() ) / 2 );
+  cmedit-> set_data_y_max_for_cmap(fl->value());
+  y_cmap_range_max_box->value(fl->value());
+  cmedit->redraw();
+}
+
+void y_cmap_range_min_slider_cb(Fl_Slider* fl, void*) {
+  fl->bounds( (cmedit->get_hist_data_y_max() - cmedit->get_hist_data_y_min() ) / 2, cmedit->get_hist_data_y_min() );
+  cmedit-> set_data_y_min_for_cmap(fl->value());
+  y_cmap_range_min_box->value(fl->value());
+  cmedit->redraw();
+}
+
+void y_display_range_max_slider_cb(Fl_Slider* fl, void*) {
+  fl->bounds( cmedit->get_hist_data_y_max(),(cmedit->get_hist_data_y_max() - cmedit->get_data_y_min_for_cmap() ) / 2 );
+  cmedit->set_data_y_max_for_display(fl->value());
+  y_display_range_max_box->value(fl->value());
+  cmedit->redraw();
+}
+
+void y_display_range_min_slider_cb(Fl_Slider* fl, void*) {
+  fl->bounds( (cmedit->get_hist_data_y_max() - cmedit->get_hist_data_y_min() ) / 2, cmedit->get_hist_data_y_min() );
+  cmedit->set_data_y_min_for_display(fl->value());
+  y_display_range_min_box->value(fl->value());
+  cmedit->redraw();
+}
+
+
+void R_updater (CMedit* cm) {
+  x_hist_range_min_box_cf(x_hist_range_min_box, NULL);
+  x_hist_range_max_box_cf(x_hist_range_max_box, NULL);
+  y_hist_range_min_box_cf(y_hist_range_min_box, NULL);
+  y_hist_range_max_box_cf(y_hist_range_max_box, NULL);
+  x_cmap_range_min_box->value(cm->get_data_x_min_for_cmap());
+  x_cmap_range_max_box->value(cm->get_data_x_max_for_cmap());
+  y_cmap_range_min_box->value(cm->get_data_y_min_for_cmap());
+  y_cmap_range_max_box->value(cm->get_data_y_max_for_cmap());
+  x_display_range_min_box->value(cm->get_data_x_min_for_display());
+  x_display_range_max_box->value(cm->get_data_x_max_for_display());
+  y_display_range_min_box->value(cm->get_data_y_min_for_display());
+  y_display_range_max_box->value(cm->get_data_y_max_for_display());
+  cm->redraw();
+}
+
+//******Zoom Panel Stuffs============//
+
+void zoom_panel_cb(Fl_Menu_*, void*) {
+  zoom_panel_window->show();
+}
+
+
+
+
+//******END Zoom Panel Stuffs============//
+
 
 //END TESTING AREA ============================================================
 
@@ -470,6 +558,9 @@ int main(int argc, char *argv[]) {
   Fl::warning = quietwarning;
 
   Fl_Window *top = make_window();
+
+  zoom_panel_window = make_zoom_panel();
+
 
   cmedit->reportto( reporter );
   cmedit->cmentto( cmenter );

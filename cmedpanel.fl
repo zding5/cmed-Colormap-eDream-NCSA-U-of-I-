@@ -8,7 +8,7 @@ decl {\#include "cmed.H"} {private local
 Function {make_window()} {open
 } {
   Fl_Window {} {open
-    xywh {435 271 405 605} type Double resizable visible
+    xywh {435 271 400 605} type Double resizable visible
   } {
     Fl_Button undobutton {
       label Undo
@@ -87,7 +87,7 @@ Function {make_window()} {open
       xywh {137 570 95 25} box FLAT_BOX color 16 align 5
     }
     Fl_Menu_Bar {} {open
-      xywh {0 0 405 20} color 46
+      xywh {0 0 400 20} color 46
     } {
       Submenu menu_file {
         label {&File} open
@@ -119,60 +119,130 @@ Function {make_window()} {open
           xywh {0 0 36 21} shortcut 0x4007a
         }
       }
-    }
-    Fl_Group {} {open selected
-      xywh {5 86 400 154}
-    } {
-      Fl_Group {} {open
-        xywh {10 86 380 118}
+      Submenu {} {
+        label {&Zoom} open
+        xywh {0 0 70 21}
       } {
-        Fl_Value_Input cmap_min {
-          label {Cmap Range:   Min}
-          callback cmap_range_min
-          xywh {151 124 89 25} when 4
-        }
-        Fl_Value_Input cmap_max {
-          label Max
-          callback cmap_range_max
-          xywh {290 124 95 25} when 4 value 1
-        }
-        Fl_Value_Input display_range_min {
-          label {Display Range: Min}
-          callback display_data_range_min
-          xywh {151 154 89 25} when 4
-        }
-        Fl_Value_Input display_range_max {
-          label Max
-          callback display_data_range_max
-          xywh {290 154 95 25} when 4 value 1
-        }
-        Fl_Output hist_max {
-          label Max
-          xywh {290 95 95 25} color 31
-        }
-        Fl_Output hist_min {
-          label {Hist Range:    Min}
-          xywh {151 95 89 25} color 31 selection_color 7
-        }
-        Fl_Slider x_range_min_slider {
-          callback x_range_min_cb
-          xywh {125 181 115 19} type {Horz Knob} align 4
-        }
-        Fl_Slider x_range_max_slider {
-          callback x_range_max_cb
-          xywh {265 182 120 18} type {Horz Knob}
+        MenuItem zoom_panel {
+          label {Zoom Panel}
+          callback zoom_panel_cb
+          xywh {0 0 36 21}
         }
       }
-      Fl_Box {} {
-        xywh {390 98 5 84} resizable
-      }
-    }
-    Fl_Value_Input max_Y {
-      label {Max Y: }
-      xywh {360 218 40 21} align 1
     }
   }
 } 
 
 class UserInterface {open
 } {} 
+
+Function {make_zoom_panel()} {open
+} {
+  Fl_Window zoom_panel_window {
+    label {Zoom Panel Window} open
+    xywh {857 310 670 490} type Double visible
+  } {
+    Fl_Group {} {open
+      xywh {0 6 417 148} box UP_BOX color 92
+    } {
+      Fl_Group {} {open
+        xywh {22 6 380 118}
+      } {
+        Fl_Value_Input x_cmap_range_min_box {
+          label {Cmap Range(X):   Min}
+          callback x_cmap_range_min_box_cb
+          xywh {163 44 89 25} when 4
+        }
+        Fl_Value_Input x_cmap_range_max_box {
+          label Max
+          callback x_cmap_range_max_box_cb
+          xywh {302 44 95 25} when 4 value 1
+        }
+        Fl_Value_Input x_display_range_min_box {
+          label {Display Range(X): Min}
+          callback x_display_range_min_box_cb
+          xywh {163 74 89 25} when 4
+        }
+        Fl_Value_Input x_display_range_max_box {
+          label Max
+          callback x_display_range_max_box_cb
+          xywh {302 74 95 25} when 4 value 1
+        }
+        Fl_Output x_hist_range_max_box {
+          label Max
+          xywh {302 15 95 25} color 31
+        }
+        Fl_Output x_hist_range_min_box {
+          label {Hist Range(X):    Min}
+          xywh {163 15 89 25} color 31 selection_color 7
+        }
+        Fl_Slider x_display_range_min_slider {
+          callback x_display_range_min_slider_cb
+          xywh {137 101 115 19} type {Horz Knob} align 4
+        }
+        Fl_Slider x_display_range_max_slider {
+          callback x_display_range_max_slider_cb
+          xywh {277 102 120 18} type {Horz Knob}
+          code0 {o->value(o->maximum());}
+        }
+      }
+      Fl_Box {} {
+        xywh {402 18 5 84} resizable
+      }
+    }
+    Fl_Group {} {open
+      xywh {420 5 245 455} box UP_BOX color 214
+    } {
+      Fl_Output y_hist_range_max_box {
+        label {Hist Range(Y) Max:}
+        callback y_hist_range_max_box_cf
+        xywh {562 12 93 25} color 47
+      }
+      Fl_Output y_hist_range_min_box {
+        label {Min:}
+        callback y_hist_range_min_box_cf
+        xywh {517 421 95 25} color 46
+      }
+      Fl_Value_Input y_cmap_range_max_box {
+        label {Cmap Range(Y) 
+Max:}
+        callback y_cmap_range_max_box_cb
+        xywh {446 88 70 20} align 1
+      }
+      Fl_Value_Input y_cmap_range_min_box {
+        label {Min:}
+        callback y_cmap_range_min_box_cb
+        xywh {446 372 70 20} align 1
+      }
+      Fl_Value_Input y_display_range_max_box {
+        label {Display Range(Y)
+Max:}
+        callback y_display_range_max_box_cb
+        xywh {565 88 72 19} align 1
+      }
+      Fl_Value_Input y_display_range_min_box {
+        label {Min:}
+        callback y_display_range_min_box_cb
+        xywh {565 371 72 19} align 1
+      }
+      Fl_Slider y_cmap_range_max_slider {
+        callback y_cmap_range_max_slider_cb
+        xywh {470 122 20 98} type {Vert Knob}
+      }
+      Fl_Slider y_display_range_min_slider {
+        callback y_display_range_min_slider_cb selected
+        xywh {590 234 20 98} type {Vert Knob}
+        code0 {o->value(o->maximum());}
+      }
+      Fl_Slider y_cmap_range_min_slider {
+        callback y_cmap_range_min_slider_cb
+        xywh {470 235 20 98} type {Vert Knob}
+        code0 {o->value(o->maximum());}
+      }
+      Fl_Slider y_display_range_max_slider {
+        callback y_display_range_max_slider_cb
+        xywh {590 120 20 98} type {Vert Knob}
+      }
+    }
+  }
+} 

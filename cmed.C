@@ -314,15 +314,29 @@ void y_display_range_min_box_cb(Fl_Value_Input* inp, void*) {
 }
 
 void x_display_range_min_slider_cb(Fl_Slider* fl, void*) {
-  fl->bounds(cmedit->get_hist_data_x_min(), (cmedit->get_hist_data_x_max() - cmedit->get_hist_data_x_min()) / 2);
-  cmedit->set_data_x_min_for_display(fl->value());
+  // fl->bounds(cmedit->get_hist_data_x_min(), (cmedit->get_hist_data_x_max() - cmedit->get_hist_data_x_min()) / 2);
+  fl->bounds(cmedit->get_hist_data_x_min(), cmedit->get_hist_data_x_max() );
+  if( fl->value() < x_display_range_max_slider->value() ) {
+    cmedit->set_data_x_min_for_display(fl->value());
+  }
+  else {
+
+  }
+
   x_display_range_min_box->value(fl->value());
   cmedit->redraw();
 }
 
 void x_display_range_max_slider_cb(Fl_Slider* fl, void*) {
-  fl->bounds( (cmedit->get_hist_data_x_max() - cmedit->get_hist_data_x_min()) / 2, cmedit->get_hist_data_x_max() );
-  cmedit->set_data_x_max_for_display(fl->value());
+  // fl->bounds( (cmedit->get_hist_data_x_max() - cmedit->get_hist_data_x_min()) / 2, cmedit->get_hist_data_x_max() );
+  fl->bounds(cmedit->get_hist_data_x_min(), cmedit->get_hist_data_x_max() );
+  if( fl->value() > x_display_range_min_slider->value() ){
+    cmedit->set_data_x_max_for_display(fl->value());
+  }
+  else {
+
+  }
+  
   x_display_range_max_box->value(fl->value());
   cmedit->redraw();
 }
@@ -342,7 +356,9 @@ void y_cmap_range_min_slider_cb(Fl_Slider* fl, void*) {
 }
 
 void y_display_range_max_slider_cb(Fl_Slider* fl, void*) {
-  fl->bounds( cmedit->get_hist_data_y_max(),(cmedit->get_hist_data_y_max() - cmedit->get_data_y_min_for_cmap() ) / 2 );
+  // fl->bounds( cmedit->get_hist_data_y_max(),(cmedit->get_hist_data_y_max() - cmedit->get_data_y_min_for_cmap() ) / 2 );
+  fl->bounds( cmedit->get_hist_data_y_max(), cmedit->get_hist_data_y_min() );
+
   cmedit->set_data_y_max_for_display(fl->value());
   y_display_range_max_box->value(fl->value());
   cmedit->redraw();

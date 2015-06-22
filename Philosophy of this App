@@ -1,0 +1,45 @@
+1. Coordinate Systems:
+	
+	1) Window Coords:
+
+		The coordinates of the fltk window, given by fltk functions.
+
+	2) Drawing Coords:
+
+		The coordinates for our drawing area, defined x: 0.0 to 1.0; y: 0.0 to 1.0.
+
+	3) Data Coords:
+
+		The coordinates for data (displayed as histograms) we read in, defined x to be x-data range and y to be y-data range.
+
+		When there's no read in data, the x and y are set to range 0.0 to 1.0.
+
+	4) Colormap Coords:
+
+		The coordinates for the range of data we want colormap to apply to.
+
+		By default, it is set to the same as Data Coords.
+
+		Also, (mainly for Y axis) if we want to separate alpha scaling from other colors, we need 2 sets of Y coordinates.
+
+	5) Display Coords:
+
+		i) For x: 
+
+			The coordinates for histograms and colormap shown. This can help us decide which part of the histograms and colormaps combined we want to display in the drawing area.
+
+			The coordinate range is a subset of x Data range (data x coords).
+
+			By default, it is set to the same as Data Coords.
+
+		ii) For y:
+
+			A little different because we have separate coords for histograms and colormap. This is for us to implement zooming effects respectively on histograms and on colormap.
+
+			The coordinate range for colormap is a subset of y Data range (data y coords) and by default, it is set to the same as Data Coords.
+
+			The coordinate range for histogram is a subset of y Data range (data y coords) and by default, it is set to the same as Data Coords.
+
+
+
+##Doxygen

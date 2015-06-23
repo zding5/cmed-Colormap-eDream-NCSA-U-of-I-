@@ -36,9 +36,9 @@
 
 			A little different because we have separate coords for histograms and colormap. This is for us to implement zooming effects respectively on histograms and on colormap.
 
-			The coordinate range for colormap is a subset of y Data range (data y coords) and by default, it is set to the same as Data Coords.
+			a) The coordinate range for colormap is a subset of y Data range (data y coords) and by default, it is set to the same as Data Coords.
 
-			The coordinate range for histogram is a subset of y Data range (data y coords) and by default, it is set to the same as Data Coords.
+			b) The coordinate range for histogram is a subset of y Data range (data y coords) and by default, it is set to the same as Data Coords.
 
 
 

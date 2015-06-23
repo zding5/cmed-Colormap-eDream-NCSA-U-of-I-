@@ -14,5 +14,6 @@ CMedit::CMedit(int x, int y, int w, int h, const char *label)
 :Fl_Gl_Window(x,y,w,h,label) {
 	init();
 	end();
+	
 }
 

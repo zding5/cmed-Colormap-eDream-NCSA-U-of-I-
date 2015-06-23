@@ -172,6 +172,16 @@ protected:
 	float data_y_min_for_cmap_;
 	float data_y_max_for_cmap_;
 
+
+	float data_x_min_for_display_;
+	float data_x_max_for_display_;
+
+	float data_y_min_for_hist_display_;
+	float data_y_max_for_hist_display_;
+	float data_y_min_for_cmap_display_;
+	float data_y_max_for_cmap_display_;
+
+
 	float data_x_min_for_display_;
 	float data_x_max_for_display_;
 
@@ -181,6 +191,11 @@ protected:
 	float data_y_max_for_cmap_display_;
 
 	// **** Coordinates Parameters END
+
+
+	// **** Coordinates Parameters END
+
+	// **** Coordinates Transformations
 
 
 	// **** Coordinates Transformations
@@ -200,6 +215,24 @@ protected:
 	float dispx2dtx( int histx ); ///< Histogram coord(Histogram Display) x to data coord x.
 	float h_dispy2dty( int histy ); ///< Histogram coord(Histogram Display) y to data coord y.
 	float c_dispy2dty( int histy );
+
+
+	//windows to drawing
+	float wx2drx( int wx ); ///< Window coord x to drawing coord x.
+	float wy2dry( int wy ); ///< Window coord y to drawing coord y.
+
+	//data to drawing
+	float dtx2drx( float dtx ); ///< Data(Histogram) coord x to drawing coord x.
+	float dty2dry( float dty ); ///< Data(Histogram) coord y to drawing coord y.
+
+	//drawing to data
+	float drx2dtx( float drx ); ///< Drawing coord x to data(histogram) coord x.
+
+	//histogram to data
+	float dispx2dtx( int histx ); ///< Histogram coord(Histogram Display) x to data coord x.
+	float h_dispy2dty( int histy ); ///< Histogram coord(Histogram Display) y to data coord y.
+	float c_dispy2dty( int histy );
+
 
 	//colormap to data
 	float cmapx2dtx( int cmapx ); ///< Cmap coord x to data coord x.

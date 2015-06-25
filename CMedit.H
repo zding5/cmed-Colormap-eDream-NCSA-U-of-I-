@@ -127,12 +127,13 @@ public:
 	void range_update_to( void(*func)( CMedit *cm ) );
 	void updaterange();
 	
-	// **** Reporters (For updating cmed class objects)
+	// **** Reporters (For updating cmed class objects) END
 
 
 	// **** Undo/Redo
 
 	void snapshot();
+	//Need to be changed
 	int undo();
 	int redo();
 
@@ -140,12 +141,13 @@ public:
 
 
 	// **** Other Stuffs that need changes
-	void postscale( float );
+/*	void postscale( float );
 	void postexpon( float );
 	float postscale() const { return postscale_; } 
 	float postexpon() const { return postexpon_; }
 
 	float Aout( float Ain ) const;
+*/
 
 	int cment() const { return cment_; }
 	void cment( int newcment );
@@ -158,7 +160,20 @@ public:
 
 protected:
 
-	int lastx_; //????
+	int lastx_; //for updating colorpatch
+	int locked, lockmin, lockmax; 
+	//We are gonna use this for locking colormap for partial editing, later switching mode.
+	int remin, remax;	/* repair region */ //Overlapped window part for some window system.
+						// Only redraw certain area.
+	enum CMfield dragfield; ///< Containing all possible color values for editing.
+	int dragfrom;
+	int dragamount;
+	float dragval;
+	//int draghue;
+	float hueshift, huezoom;
+
+	char **comments;
+	int ncomments, maxcomments;
 
 
 	// **** Coordinates Parameters
@@ -181,15 +196,6 @@ protected:
 	float data_y_min_for_cmap_display_;
 	float data_y_max_for_cmap_display_;
 
-
-	float data_x_min_for_display_;
-	float data_x_max_for_display_;
-
-	float data_y_min_for_hist_display_;
-	float data_y_max_for_hist_display_;
-	float data_y_min_for_cmap_display_;
-	float data_y_max_for_cmap_display_;
-
 	// **** Coordinates Parameters END
 
 
@@ -211,27 +217,11 @@ protected:
 	//drawing to data
 	float drx2dtx( float drx ); ///< Drawing coord x to data(histogram) coord x.
 
-	//histogram to data
-	float dispx2dtx( int histx ); ///< Histogram coord(Histogram Display) x to data coord x.
-	float h_dispy2dty( int histy ); ///< Histogram coord(Histogram Display) y to data coord y.
-	float c_dispy2dty( int histy );
-
-
-	//windows to drawing
-	float wx2drx( int wx ); ///< Window coord x to drawing coord x.
-	float wy2dry( int wy ); ///< Window coord y to drawing coord y.
-
-	//data to drawing
-	float dtx2drx( float dtx ); ///< Data(Histogram) coord x to drawing coord x.
-	float dty2dry( float dty ); ///< Data(Histogram) coord y to drawing coord y.
-
-	//drawing to data
-	float drx2dtx( float drx ); ///< Drawing coord x to data(histogram) coord x.
 
 	//histogram to data
-	float dispx2dtx( int histx ); ///< Histogram coord(Histogram Display) x to data coord x.
-	float h_dispy2dty( int histy ); ///< Histogram coord(Histogram Display) y to data coord y.
-	float c_dispy2dty( int histy );
+	float dispx2dtx( int dispx ); ///< Histogram coord(Histogram Display) x to data coord x.
+	float h_dispy2dty( int h_dispy ); ///< Histogram coord(Histogram Display) y to data coord y.
+	float c_dispy2dty( int c_dispy );
 
 
 	//colormap to data
@@ -251,37 +241,26 @@ protected:
 
 
 	// **** Other Stuffs for now
-	int cment_, snapcment_;
-	float snap[4][CMENTMAX];
 
+	int cment_
 	int data_point_num_;
 	float *hist_ent_arr;
 
-	float postscale_, postexpon_;
+//	float postscale_, postexpon_;
 
 	void (*cmentcb_)( const CMedit * );
 	float huenear(float hue, float hueref);
 	float hue2y(float hue);
 	float y2hue(float y);
 
-	int wx2x( int wx );
+/*	int wx2x( int wx );
 	float wy2y( int wy );
+*/
 
 	void (*reportfunc)( CMedit *, int index );
 
 	void (*range_updater)(CMedit *);
 
-	float hueshift, huezoom;
-	int remin, remax;	/* repair region */
-	int dragfrom;
-	int dragamount;
-	enum CMfield dragfield;
-	float dragval;
-	int draghue;
-	int locked, lockmin, lockmax;
-
-	char **comments;
-	int ncomments, maxcomments;
 
 	// **** Other Stuffs for now END
 

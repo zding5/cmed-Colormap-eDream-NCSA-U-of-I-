@@ -100,7 +100,7 @@ public:
 	int hist_fload( FILE *inf ); ///< Handles the loading histogram file option.
 
 	virtual void draw(); //must be called draw()
-	virtual void handle(int ev); //have to be called handle???
+	virtual int handle(int ev); //have to be called handle???
 	virtual void resize(int nx, int ny, int nw, int nh);
 
 
@@ -177,6 +177,7 @@ protected:
 
 
 	// **** Coordinates Parameters
+	int cment_; ///< Number of colormap entries
 	float hist_data_x_min_;
 	float hist_data_x_max_;
 	float hist_data_y_min_;
@@ -226,13 +227,13 @@ protected:
 
 	//colormap to data
 	float cmapx2dtx( int cmapx ); ///< Cmap coord x to data coord x.
-	float cmapy2dty( int cmapy ); ///< Cmap coord y to data coord y.
+	// float cmapy2dty( int cmapy ); ///< Cmap coord y to data coord y.
 
 	//data to colormap
 	int dtx2cmapx( float dtx ); ///< Data(Histogram) coord x to cmap coord x.
 
 	//data to histogram
-	int dtx2dispx( float dtx );	///< Data(Histogram) coord x to histogram(Histogram Display) coord x.
+	// int dtx2dispx( float dtx );	///< Data(Histogram) coord x to histogram(Histogram Display) coord x.
 
 	float hist_display_y_scaler( float dty ); ///< Scaler for histogram display in y axis.
 
@@ -242,7 +243,6 @@ protected:
 
 	// **** Other Stuffs for now
 
-	int cment_
 	int data_point_num_;
 	float *hist_ent_arr;
 

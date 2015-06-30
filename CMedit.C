@@ -235,6 +235,12 @@ int cmap_fload( FILE *inf ) {
 
 	int line_number;
 	char* buf1, buf2;
+	int nix;
+	int ix; // ix is the current colormap entry index we are trying to write to.
+	int ox; // ox is the current colormap entry index we are using to output ???
+	int prevox; // prevox is the previous ox ???
+	char tc[2]; //for storing color temporarily for specially formatted cmap entry. "No. of entry : RGB"
+	int count = -1;
 
 	while(getline(&line, &line_size, inf) != -1) {
 		line_number++;
@@ -245,11 +251,116 @@ int cmap_fload( FILE *inf ) {
 			//skip potential empty lines
 			continue;
 		}
+
+		//check for colormap range flags
+		buf2 = strstr(buf1, "#cmAppXMin");
+		if( buf2 != NULL ) {
+			if(0==strncmp(buf2, "#cmAppXMin", 10)) {
+				*buf2 = '\0';
+				buf2 += 10;
+				if(*buf2 == '=' || *buf2 == ':') {
+					buf2++;
+				}
+				sscanf(buf2, "%f", &data_x_min_for_cmap_);
+				buf1 = buf2; //how would this prevent recording this as a comment???
+			}
+		}
+
+		buf2 = strstr(buf1, "#cmAppXMax");
+		if( buf2 != NULL ) {
+			if(0==strncmp(buf2, "#cmAppXMax", 10)) {
+				*buf2 = '\0';
+				buf2 += 10;
+				if(*buf2 == '=' || *buf2 == ':') {
+					buf2++;
+				}
+				sscanf(buf2, "%f", &data_x_max_for_cmap_);
+				buf1 = buf2;
+			}
+		}
+
+		//load in comments for future saving
+		if(*buf1 == '#') {
+			if(ncomments >= maxcomments) {
+				maxcomments *= 2;
+				comments = (char **)realloc( comments, maxcomments * sizeof(char *) );
+			}
+			comments[ncomments++] = strdup( line );
+			continue;
+		}
+
+		/* ``nnn:'' entries set the colormap pointer ... */
+		/* This is for special format, "Colormap entry : RGB". With this we can skip colormap entries
+		without specifying color in cmap file (those will be left with default color setting). */
+	 	if(sscanf(line, "%d%1[:]", &nix, tc) == 2) { //What is in the sscanf , "%1[:]" ???
+	 		//Why using nix ???
+			ix = nix;
+			buf1 = strchr(line, ':') + 1;
+			while(*buf1 && isspace(*buf1)) {
+				buf1++;
+			}
+			if(*buf1 == '\0' || *buf1 == '\n' || *buf1 == '#')
+		 	continue;
+		}
+
+		if(count == -1) {
+			if(!sscanf(line, "%d", &count) || count < 1) { //Specified numbe of lines in cmap file
+				// Don't we want a flag for this ???
+				fprintf(stderr, "Not a .cmap file?  Doesn't begin with a number.\n");
+				return 0;
+			}
+			cment( count );
+			ix = 0, prevox = 0;
+			continue;
+		}
+		else {
+			if(ix >= count) {
+				break;
+			}
+
+			rgba[3] = 1;
+			if(sscanf(buf1, "%f%f%f%f", &rgba[0],&rgba[1],&rgba[2],&rgba[3]) < 3) {
+				fprintf(stderr, "Couldn't read colormap line %d (cmap entry %d of 0..%d)\n",
+				line_number, ix, count-1);
+				return 0;
+			}
+			rgb2hsb( rgba[0],rgba[1],rgba[2], &hsba[0],&hsba[1],&hsba[2] );
+			hsba[3] = rgba[3];//WHAT ???
+			if(ox == 0) {
+				memcpy(phsba, hsba, sizeof(phsba));
+			}
+			else {
+				phsba[0] = huenear(phsba[0], hsba[0]);
+			}
+			ox = (cment_-1) * ix / count + 1;
+			for(f = 0; f < 4; f++) {
+				dragrange( prevox, ox, flds[f], phsba[f], hsba[f], 1.0 );
+				phsba[f] = hsba[f];
+			}
+			prevox = ox;
+			ix++;
+		}
 	}
+
+	if(count <= 0) {
+		fprintf(stderr, "Empty colormap file?\n");
+		return 0;
+	}
+	
+	if(ix < count) {
+		fprintf(stderr, "Only got %d colormap entries, expected %d\n", ix, count);
+	}
+	
+	for(f = 0; f < 4; f++) {
+		dragrange( prevox, cment_, flds[f], phsba[f], phsba[f], 1.0 );
+	}
+
+	return ix > 0;
+
 }
 
 int cmap_fsave( FILE *outf ) {
-	return 0;
+	float r,g,b;
 }
 
 int hist_fload( FILE *inf ) {

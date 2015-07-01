@@ -53,6 +53,7 @@ public:
 
 
     // **** Getters and Setters
+	int cment(); ///< get number of colormap entries cment_.
 	float get_hist_data_x_min(); ///< getter for the minimum data value (minimum histogram x value).
 	float get_hist_data_x_max(); ///< getter for the maximum data value (minimum histogram x value).
 	float get_hist_data_y_min();
@@ -70,6 +71,7 @@ public:
 	float get_data_y_min_for_cmap_display();
 	float get_data_y_max_for_cmap_display();
 
+	void cment( int newcment ); ///< set number of colormap entries cment_.
 	void set_hist_data_x_min(float val);
 	void set_hist_data_x_max(float val);
 	void set_hist_data_y_min(float val);
@@ -149,8 +151,6 @@ public:
 	float Aout( float Ain ) const;
 */
 
-	int cment() const { return cment_; }
-	void cment( int newcment );
 
 	int hsbmode;
 	float lerpval;
@@ -178,6 +178,7 @@ protected:
 
 	// **** Coordinates Parameters
 	int cment_; ///< Number of colormap entries
+	int data_point_num_; ///< Number of Histogram entries
 	float hist_data_x_min_;
 	float hist_data_x_max_;
 	float hist_data_y_min_;
@@ -243,7 +244,6 @@ protected:
 
 	// **** Other Stuffs for now
 
-	int data_point_num_;
 	float *hist_ent_arr;
 
 //	float postscale_, postexpon_;

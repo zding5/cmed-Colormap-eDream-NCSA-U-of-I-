@@ -130,6 +130,14 @@ CMedit::CMedit(int x, int y, int w, int h, const char *label)
 }
 
 // **** Getters and Setters
+int cment() {
+	return cment_;
+}
+
+void cment( int newcment ) {
+
+}
+
 float CMedit::get_hist_data_x_min() {
 	return hist_data_x_min_;
 }
@@ -265,7 +273,6 @@ int cmap_fload( FILE *inf ) {
 				buf1 = buf2; //how would this prevent recording this as a comment???
 			}
 		}
-
 		buf2 = strstr(buf1, "#cmAppXMax");
 		if( buf2 != NULL ) {
 			if(0==strncmp(buf2, "#cmAppXMax", 10)) {
@@ -361,11 +368,57 @@ int cmap_fload( FILE *inf ) {
 
 int cmap_fsave( FILE *outf ) {
 	float r,g,b;
+	int i, ok = 1;
+
+	fprintf(outf, "%s %d\n", "#cmAppXMin", CMAPAPP_XMIN);
+	fprintf(outf, "%s %d\n", "#cmAppXMax", CMAPAPP_XMAX);
+	fprintf(outf, "%d\n", cment_);
+	for(i = 0; i < cment_; i++) {
+		hsb2rgb( vh[i], vs[i], vb[i], &r, &g, &b );
+		if(fprintf(outf, "%f %f %f %f\n", r, g, b, Aout( alpha[i] )) <= 0)
+		ok = 0;		
+	}
+	if(ncomments > 0) {
+		fputs("\n", outf);
+	}
+	for(i = 0; i < ncomments; i++) {
+		fputs(comments[i], outf);
+	}
+	return ok;
 }
 
 int hist_fload( FILE *inf ) {
-	return 0;
+	char* line;
+	size_t line_size; 
+	char *flag_pointer;
+	int entry_counter;
+
+	getline(&line, &line_size, inf);
+	data_point_num_ = atoi(line);
+
+	getline(&line, &line_size, inf);
+	hist_data_x_max_ = atoi(line);
+	data_x_max_for_cmap_ = hist_data_x_max_;
+	data_x_max_for_display_ = hist_data_x_max_;
+	
+	hist_ent_arr = (float*) malloc(hist_data_x_max_ * sizeof(float));
+
+	for (int i=0; i<hist_data_x_max_; i++) {
+    	getline(&line, &line_size, inf);
+		strtok(line, " ");
+		hist_ent_arr[i] = atof(strtok(NULL, " "));
+		maxmax = (hist_ent_arr[i]>maxmax)?hist_ent_arr[i]:maxmax;
+	}
+
+	hist_data_y_max_ = maxmax;
+	data_y_max_for_cmap_ = hist_data_y_max_;
+	data_y_max_for_display_ = hist_data_y_max_;
+	
+	updaterange();
+	redraw();
 }
+
+// **** I/O Stuffs END
 
 virtual void draw() {
 
@@ -378,5 +431,3 @@ virtual void resize(int nx, int ny, int nw, int nh) {
 }
 
 
-
-// **** I/O Stuffs END

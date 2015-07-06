@@ -138,7 +138,7 @@ void menu_fload_cb( Fl_Menu_*, void * ) {
 
   cmedit->snapshot();
 
-  if(!cmedit->fload( inf )) {
+  if(!cmedit->cmap_fload( inf )) {
     fprintf(stderr, "%s: can't read colormap\n", fname);
     // fnamebox->insert(" [?]");
   }
@@ -186,7 +186,7 @@ void menu_fsave_cb( Fl_Menu_*, void * ) {
     outf = fopen(fname, "w");
   }
 
-  if( cmedit->fsave( outf ) ) {
+  if( cmedit->cmap_fsave( outf ) ) {
     fprintf(stderr, "%s: saved\n", fname);
   } else {
     fprintf(stderr, "%s: write error: ", fname);
@@ -223,7 +223,7 @@ void menu_histfload_cb( Fl_Menu_*, void*) {
 
 //snapshot???
 
-  if(!cmedit->histfload( inf )) {
+  if(!cmedit->hist_fload( inf )) {
     fprintf(stderr, "%s: can't read histogram\n", fname);
   }
   cmedit->redraw();

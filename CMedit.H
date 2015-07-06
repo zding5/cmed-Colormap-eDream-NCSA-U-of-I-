@@ -105,14 +105,16 @@ public:
 	virtual int handle(int ev); //have to be called handle???
 	virtual void resize(int nx, int ny, int nw, int nh);
 
-
+	int handle_drawing(int ev);
+	int handle_zooming(int ev);
+	int handle_interpolation(int ev);
 
 	// **** I/O Stuffs END
 
 
 	// **** Mouse/Keyboard Handling
 
-	float drag( int index, enum CMfield field, float value, float lerp = 1.0 );
+	float drag_drawing( int index, enum CMfield field, float value, float lerp = 1.0 );
 	void dragrange( int x0, int x1, enum CMfield field, float v0, float v1, float lerp = 1.0 ); //what for?
 
 
@@ -174,6 +176,8 @@ protected:
 
 	char **comments;
 	int ncomments, maxcomments;
+
+	int editing_mode; ///< The flag for switching editing mode: 1 for drawing, 2 for zooming, 3 for interpolation
 
 
 	// **** Coordinates Parameters

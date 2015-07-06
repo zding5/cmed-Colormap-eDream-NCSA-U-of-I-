@@ -508,7 +508,7 @@ void CMedit::draw() {
   glDisable( GL_DEPTH_TEST );
   glDisable( GL_LIGHTING );
   glDisable( GL_TEXTURE_2D );
-  glDisable( GL_COLOR_MATERIAL ); 
+  glDisable( GL_COLOR_MATERIAL );
 
 //***histogram part=========================
 

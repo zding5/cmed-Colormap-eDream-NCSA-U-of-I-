@@ -89,7 +89,7 @@ float CMedit::drx2dtx( float drx ) {
 
 //colormap apply to data
 float CMedit::cmapx2dtx( int cmapx ) {
-	return (CMAPAPP_XMIN + (cmapx - CMAPAPP_XMIN) * ( CMAPAPP_XW ) / DTHIST_XW);
+	return (CMAPAPP_XMIN + (cmapx - CMAP_XMIN) * ( CMAPAPP_XW ) / CMAP_XW);
 }
 
 float CMedit::dispx2dtx( int dispx ) {
@@ -600,6 +600,7 @@ void CMedit::draw() {
 		for(i = CMAP_XMIN; i <= CMAP_XMAX-1; i++) {
 			glVertex2f( dtx2drx(cmapx2dtx(i)), r[i] );
 			if(coarse) glVertex2f( dtx2drx(cmapx2dtx(i+1)), r[i] );
+			printf("%d | %f | %f\n", i, cmapx2dtx(i+1), dtx2drx(cmapx2dtx(i+1)));
 		}
 		glEnd();
 

@@ -304,13 +304,13 @@ void x_display_range_max_box_cb(Fl_Value_Input* inp, void*) {
 }
 
 void y_display_range_max_box_cb(Fl_Value_Input* inp, void*) {
-  cmedit->set_data_y_max_for_display(inp->value());
-  cmedit->redraw();
+  // cmedit->set_data_y_max_for_display(inp->value());
+  // cmedit->redraw();
 }
 
 void y_display_range_min_box_cb(Fl_Value_Input* inp, void*) {
-  cmedit->set_data_y_min_for_display(inp->value());
-  cmedit->redraw();
+  // cmedit->set_data_y_min_for_display(inp->value());
+  // cmedit->redraw();
 }
 
 void x_display_range_min_slider_cb(Fl_Slider* fl, void*) {
@@ -356,17 +356,16 @@ void y_cmap_range_min_slider_cb(Fl_Slider* fl, void*) {
 }
 
 void y_display_range_max_slider_cb(Fl_Slider* fl, void*) {
-  // fl->bounds( cmedit->get_hist_data_y_max(),(cmedit->get_hist_data_y_max() - cmedit->get_data_y_min_for_cmap() ) / 2 );
   fl->bounds( cmedit->get_hist_data_y_max(), cmedit->get_hist_data_y_min() );
 
-  cmedit->set_data_y_max_for_display(fl->value());
+  // cmedit->set_data_y_max_for_display(fl->value());
   y_display_range_max_box->value(fl->value());
   cmedit->redraw();
 }
 
 void y_display_range_min_slider_cb(Fl_Slider* fl, void*) {
   fl->bounds( (cmedit->get_hist_data_y_max() - cmedit->get_hist_data_y_min() ) / 2, cmedit->get_hist_data_y_min() );
-  cmedit->set_data_y_min_for_display(fl->value());
+  // cmedit->set_data_y_min_for_display(fl->value());
   y_display_range_min_box->value(fl->value());
   cmedit->redraw();
 }
@@ -383,8 +382,8 @@ void R_updater (CMedit* cm) {
   y_cmap_range_max_box->value(cm->get_data_y_max_for_cmap());
   x_display_range_min_box->value(cm->get_data_x_min_for_display());
   x_display_range_max_box->value(cm->get_data_x_max_for_display());
-  y_display_range_min_box->value(cm->get_data_y_min_for_display());
-  y_display_range_max_box->value(cm->get_data_y_max_for_display());
+  // y_display_range_min_box->value(cm->get_data_y_min_for_display());
+  // y_display_range_max_box->value(cm->get_data_y_max_for_display());
   cm->redraw();
 }
 
@@ -523,17 +522,18 @@ void reporter( CMedit *cm, int x )
   cshow.rgba->value( msg );
   cshow.color->rgba( rgba[0], rgba[1], rgba[2], rgba[3] );
   cshow.color->redraw();
-  sprintf(msg, "%g", cm->Aout( rgba[3] ) );
-  cshow.scaleout->value(msg);
+  // sprintf(msg, "%g", cm->Aout( rgba[3] ) );
+  // cshow.scaleout->value(msg);
   if(cshow.cmentin->value() != cm->cment())
     cshow.cmentin->value( cm->cment() );
-  if(cshow.postscalein->value() != cm->postscale())
-    cshow.postscalein->value( cm->postscale() );
-  if(cshow.postexponin->value() != cm->postexpon())
-    cshow.postexponin->value( cm->postexpon() );
+  // if(cshow.postscalein->value() != cm->postscale())
+    // cshow.postscalein->value( cm->postscale() );
+  // if(cshow.postexponin->value() != cm->postexpon())
+    // cshow.postexponin->value( cm->postexpon() );
 }
 
 void cmenter( const CMedit *cm )
+// void cmenter( CMedit *cm )
 {
   if(cshow.cmentin->value() != cm->cment())
     cshow.cmentin->value( cm->cment() );
@@ -541,13 +541,13 @@ void cmenter( const CMedit *cm )
 
 void ascale_cb( Fl_Value_Input*, void* ) {
 
-  if(cshow.postscalein->value() != cmedit->postscale() ||
-     cshow.postexponin->value() != cmedit->postexpon()) {
+  // if(cshow.postscalein->value() != cmedit->postscale() ||
+     // cshow.postexponin->value() != cmedit->postexpon()) {
 
-    cmedit->postscale( cshow.postscalein->value() );
-    cmedit->postexpon( cshow.postexponin->value() );
-    cmedit->report();
-  }
+    // cmedit->postscale( cshow.postscalein->value() );
+    // cmedit->postexpon( cshow.postexponin->value() );
+    // cmedit->report();
+  // }
 }
 
 void ncment_cb( Fl_Value_Input *inp, void * )

@@ -89,7 +89,7 @@ float CMedit::drx2dtx( float drx ) {
 
 //colormap apply to data
 float CMedit::cmapx2dtx( int cmapx ) {
-	return (CMAPAPP_XMIN + (cmapx - CMAPAPP_XMIN) * ( CMAPAPP_XW ) / DTHIST_XW)
+	return (CMAPAPP_XMIN + (cmapx - CMAPAPP_XMIN) * ( CMAPAPP_XW ) / DTHIST_XW);
 }
 
 float CMedit::dispx2dtx( int dispx ) {
@@ -131,12 +131,36 @@ CMedit::CMedit(int x, int y, int w, int h, const char *label)
 }
 
 // **** Getters and Setters
-int cment() {
+int CMedit::cment() const {
 	return cment_;
 }
 
-void cment( int newcment ) {
+void CMedit::cment( int newcment ) { // Change cmap entry number
+	if(newcment < 1) return;
+	if(newcment > CMENTMAX) {
+		fprintf(stderr, "Oops, can't ask for more than %d colormap entries -- using %d\n", CMENTMAX,CMENTMAX);
+		newcment = CMENTMAX;
+	}
+	if(cment_ == newcment) return;
+	/* Resample */ 
+	snapshot();
 
+	int smooth = 0; // (cment_ < newcment);
+	// for(int o = 0; o < newcment; o++) {
+	// 	float at = newcment > 1 ? (float)o / (newcment-1) : 0;
+	// 	vh[o] = sample( &snap[0][0], cment_, at, smooth );
+	// 	vs[o] = sample( &snap[1][0], cment_, at, smooth );
+	// 	vb[o] = sample( &snap[2][0], cment_, at, smooth );
+	// 	alpha[o] = sample( &snap[3][0], cment_, at, smooth );
+	// }
+	cment_ = newcment;
+	remin = 0;
+	remax = cment_ - 1;
+	lockmin = 0;
+	lockmax = cment_ - 1;
+	if(cmentcb_ != 0) (*cmentcb_)( this );
+	report( dragfrom );
+	redraw();
 }
 
 float CMedit::get_hist_data_x_min() {
@@ -235,7 +259,7 @@ void CMedit::set_data_y_max_for_cmap_display(float val) {
 
 // **** I/O Stuffs
 
-int cmap_fload( FILE *inf ) {
+int CMedit::cmap_fload( FILE *inf ) {
 	char* line;
 	size_t line_size;
 
@@ -243,13 +267,15 @@ int cmap_fload( FILE *inf ) {
 	static enum CMfield flds[4] = { HUE, SAT, BRIGHT, ALPHA };
 
 	int line_number;
-	char* buf1, buf2;
+	char *buf1, *buf2;
 	int nix;
 	int ix; // ix is the current colormap entry index we are trying to write to.
 	int ox; // ox is the current colormap entry index we are using to output ???
 	int prevox; // prevox is the previous ox ???
 	char tc[2]; //for storing color temporarily for specially formatted cmap entry. "No. of entry : RGB"
 	int count = -1;
+
+	int f;
 
 	while(getline(&line, &line_size, inf) != -1) {
 		line_number++;
@@ -367,7 +393,7 @@ int cmap_fload( FILE *inf ) {
 
 }
 
-int cmap_fsave( FILE *outf ) {
+int CMedit::cmap_fsave( FILE *outf ) {
 	float r,g,b;
 	int i, ok = 1;
 
@@ -376,7 +402,9 @@ int cmap_fsave( FILE *outf ) {
 	fprintf(outf, "%d\n", cment_);
 	for(i = 0; i < cment_; i++) {
 		hsb2rgb( vh[i], vs[i], vb[i], &r, &g, &b );
-		if(fprintf(outf, "%f %f %f %f\n", r, g, b, Aout( alpha[i] )) <= 0)
+		// if(fprintf(outf, "%f %f %f %f\n", r, g, b, Aout( alpha[i] )) <= 0)
+		if(fprintf(outf, "%f %f %f %f\n", r, g, b, alpha[i] ) <= 0)
+
 		ok = 0;		
 	}
 	if(ncomments > 0) {
@@ -388,11 +416,12 @@ int cmap_fsave( FILE *outf ) {
 	return ok;
 }
 
-int hist_fload( FILE *inf ) {
+int CMedit::hist_fload( FILE *inf ) {
 	char* line;
 	size_t line_size; 
 	char *flag_pointer;
 	int entry_counter;
+	int maxmax;
 
 	getline(&line, &line_size, inf);
 	data_point_num_ = atoi(line);
@@ -413,7 +442,7 @@ int hist_fload( FILE *inf ) {
 
 	hist_data_y_max_ = maxmax;
 	data_y_max_for_cmap_ = hist_data_y_max_;
-	data_y_max_for_display_ = hist_data_y_max_;
+	data_y_max_for_hist_display_ = hist_data_y_max_;
 	
 	updaterange();
 	redraw();
@@ -422,7 +451,11 @@ int hist_fload( FILE *inf ) {
 // **** I/O Stuffs END
 
 // **** Virtual Funcs: draw(), resize() and handle()
-virtual void draw() {
+void CMedit::draw() {
+
+	int i;
+	float v;
+	int coarse = 1;
 
 	if(!valid() || damage()) {
 	// not valid??? or damage (means the window is damaged for some reason, say overlapped by another window)
@@ -432,13 +465,13 @@ virtual void draw() {
 		// If 
 
 		glViewport( 0, 0, w(), h() );
-		glMatrixmode( GL_PROJECTION );
+		glMatrixMode( GL_PROJECTION );
 		glLoadIdentity();
 
 		glOrtho( DR_XMIN, DR_XMAX, DR_YMIN, DR_YMAX, -1, 1 );
 		// Might have to change for y axis
 
-		glMatrixmode( GL_MODELVIEW );
+		glMatrixMode( GL_MODELVIEW );
 		glLoadIdentity();
 
 	}
@@ -455,18 +488,20 @@ virtual void draw() {
 
 	if(hist_ent_arr!=NULL) {
 		glBegin(GL_QUADS);
-		for (i = HIST_XMIN; i<=HIST_XMAX-1; i++) {
+		// for (i = HIST_XMIN; i<=HIST_XMAX-1; i++) { ...
+		for (i = DTHIST_XMIN; i<=DTHIST_XMAX-1; i++) {
+
 			glColor3f( 0,0,0 );
-			glVertex2f( dtx2drx(histx2dtx(i)), 0.0 );
-			glVertex2f( dtx2drx(histx2dtx(i)), dty2dry(hist_ent_arr[i]) );
-			glVertex2f( dtx2drx(histx2dtx(i+1)), dty2dry(hist_ent_arr[i]) );
-			glVertex2f( dtx2drx(histx2dtx(i+1)), 0.0 );
+			glVertex2f( dtx2drx(dispx2dtx(i)), 0.0 );
+			glVertex2f( dtx2drx(dispx2dtx(i)), dty2dry(hist_ent_arr[i]) );
+			glVertex2f( dtx2drx(dispx2dtx(i+1)), dty2dry(hist_ent_arr[i]) );
+			glVertex2f( dtx2drx(dispx2dtx(i+1)), 0.0 );
 
 			glColor3f( 1,1,1 );
-			glVertex2f( dtx2drx(histx2dtx(i)), YBAR0 );
-			glVertex2f( dtx2drx(histx2dtx(i)), 0.0 );
-			glVertex2f( dtx2drx(histx2dtx(i+1)), 0.0 );
-			glVertex2f( dtx2drx(histx2dtx(i+1)), YBAR0 );
+			glVertex2f( dtx2drx(dispx2dtx(i)), YBAR0 );
+			glVertex2f( dtx2drx(dispx2dtx(i)), 0.0 );
+			glVertex2f( dtx2drx(dispx2dtx(i+1)), 0.0 );
+			glVertex2f( dtx2drx(dispx2dtx(i+1)), YBAR0 );
 			// This is supposed to draw thin strips indicating where there are data there.
 			// What would happen when scaling???
 
@@ -474,13 +509,18 @@ virtual void draw() {
 		glEnd();
 
 		glBegin(GL_QUADS);
-		for (i = HIST_XMIN; i<=HIST_XMAX-1; i++) {
+		// for (i = HIST_XMIN; i<=HIST_XMAX-1; i++) { ...
+		for (i = DTHIST_XMIN; i<=DTHIST_XMAX-1; i++) {
 			float rgb[3];
-			float j = histx2dtx(i);
-			float k = histx2dtx(i+1);
+			// float j = histx2dtx(i);
+			// float k = histx2dtx(i+1);
+			float j = dispx2dtx(i);
+			float k = dispx2dtx(i+1);
 
-			if (j >= DTCMAP_XMIN && j <= DTCMAP_XMAX){
-				hsb2rgb(vh[ dtx2cmapx(histx2dtx(i)) ], vs[ dtx2cmapx(histx2dtx(i)) ], vb[ dtx2cmapx(histx2dtx(i)) ], &rgb[0], &rgb[1], &rgb[2]);
+			// if (j >= DTCMAP_XMIN && j <= DTCMAP_XMAX){
+			if (j >= CMAPAPP_XMIN && j <= CMAPAPP_XMAX){
+
+				hsb2rgb(vh[ dtx2cmapx(dispx2dtx(i)) ], vs[ dtx2cmapx(dispx2dtx(i)) ], vb[ dtx2cmapx(dispx2dtx(i)) ], &rgb[0], &rgb[1], &rgb[2]);
 			}
 
 			else {
@@ -490,10 +530,10 @@ virtual void draw() {
 			}
 
 			glColor3fv( rgb );
-			glVertex2f( dtx2drx(histx2dtx(i)), 0.0 );
-			glVertex2f( dtx2drx(histx2dtx(i)), dty2dry(hist_ent_arr[i]) );
-			glVertex2f( dtx2drx(histx2dtx(i+1)), dty2dry(hist_ent_arr[i]) );
-			glVertex2f( dtx2drx(histx2dtx(i+1)), 0.0 );
+			glVertex2f( dtx2drx(dispx2dtx(i)), 0.0 );
+			glVertex2f( dtx2drx(dispx2dtx(i)), dty2dry(hist_ent_arr[i]) );
+			glVertex2f( dtx2drx(dispx2dtx(i+1)), dty2dry(hist_ent_arr[i]) );
+			glVertex2f( dtx2drx(dispx2dtx(i+1)), 0.0 );
 		}	
 		glEnd();
 	}
@@ -507,8 +547,11 @@ virtual void draw() {
 	glVertex2f( remin, -.05 );
 	glVertex2f( remax+1, -.05 );
 	glColor3f( 1,1,1 );
-	glVertex2f( remax+1, YMIN );
-	glVertex2f( remin, YMIN );
+	// glVertex2f( remax+1, YMIN );
+	// glVertex2f( remin, YMIN );
+	glVertex2f( remax+1, DR_YMIN );
+	glVertex2f( remin, DR_YMIN );
+
 	glEnd();
 
 	glLineWidth( 1 );
@@ -613,10 +656,10 @@ virtual void draw() {
 		rgba[3] = alpha[i];
 		glColor4fv( rgba );
 		glVertex2f( dtx2drx(cmapx2dtx(i)), YBAR2 );
-		glVertex2f( dtx2drx(cmapx2dtx(i)), YMIN );
+		glVertex2f( dtx2drx(cmapx2dtx(i)), DR_YMIN );
 		if(coarse) {
 			glVertex2f( dtx2drx(cmapx2dtx(i+1)), YBAR2 );
-			glVertex2f( dtx2drx(cmapx2dtx(i+1)), YMIN );
+			glVertex2f( dtx2drx(cmapx2dtx(i+1)), DR_YMIN );
 		}
 	}
 	glEnd();
@@ -640,14 +683,14 @@ virtual void draw() {
 
 }
 
-virtual void resize(int nx, int ny, int nw, int nh) {
+void CMedit::resize(int nx, int ny, int nw, int nh) {
 	w(nw);
 	h(nh);
 	hide();
 	show();
 }
 
-virtual int handle(int ev) {
+int CMedit::handle(int ev) {
 
 	if(editing_mode == 1) {
 		return handle_drawing(ev);
@@ -657,17 +700,17 @@ virtual int handle(int ev) {
 		return handle_zooming(ev);
 	}
 
-	else (editing_mode == 3) {
+	else {
 		return handle_interpolation(ev);
 	}
 
 }
 
-int handle_drawing(ev) {
+int CMedit::handle_drawing(int ev) {
 
 	int x = dtx2cmapx(drx2dtx(wx2drx( Fl::event_x() )));
 	// x value in data coord
-	float y = wy2dry( Fl::event_y );
+	float y = wy2dry( Fl::event_y() );
 	// y value in drawing coord
 	int xmin, xmax;
 
@@ -755,17 +798,19 @@ int handle_drawing(ev) {
 		report( x );
 		return 1;
 
-		case FL_ENTER:
-		case FL_LEAVE:
-		dragfrom = x;
-		report( x );
-		return 1;
-
 		case FL_MOVE:
 		dragfrom = x;
 		report( x );
 		return 1;
 	}
+	return 0;
+}
+
+int CMedit::handle_zooming(int ev) {
+	return 0;
+}
+
+int CMedit::handle_interpolation(int ev) {
 	return 0;
 }
 
@@ -866,33 +911,6 @@ static float sample( float *a, int ents, float at, int smooth ) {
 }
 // WHAT ???
 
-void CMedit::cment( int newcment ) { // Change cmap entry number
-	if(newcment < 1) return;
- 	if(newcment > CMENTMAX) {
-    	fprintf(stderr, "Oops, can't ask for more than %d colormap entries -- using %d\n", CMENTMAX,CMENTMAX);
-		newcment = CMENTMAX;
-	}
-	if(cment_ == newcment) return;
-	/* Resample */ 
-	snapshot();
-
-	int smooth = 0; // (cment_ < newcment);
-	for(int o = 0; o < newcment; o++) {
-		float at = newcment > 1 ? (float)o / (newcment-1) : 0;
-		vh[o] = sample( &snap[0][0], cment_, at, smooth );
-		vs[o] = sample( &snap[1][0], cment_, at, smooth );
-		vb[o] = sample( &snap[2][0], cment_, at, smooth );
-		alpha[o] = sample( &snap[3][0], cment_, at, smooth );
-	}
-	cment_ = newcment;
-	remin = 0;
-	remax = cment_ - 1;
-	lockmin = 0;
-	lockmax = cment_ - 1;
-	if(cmentcb_ != 0) (*cmentcb_)( this );
-	report( dragfrom );
-	redraw();
-}
 
 void CMedit::getrgba( int index, float rgba[4] ) const {
 	if(index < 0 || index >= cment()-1) {
@@ -947,34 +965,36 @@ void colorpatch::draw() {
 	glClear( GL_COLOR_BUFFER_BIT );
 }
 
-void snapshot() {
-	for(int k = 0; k < CMENTMAX; k++) {
-		snap[0][k] = vh[k];
-		snap[1][k] = vs[k];
-		snap[2][k] = vb[k];
-		snap[3][k] = alpha[k];
-	}
-	snapcment_ = cment_;	
+void CMedit::snapshot() {
+	// for(int k = 0; k < CMENTMAX; k++) {
+	// 	snap[0][k] = vh[k];
+	// 	snap[1][k] = vs[k];
+	// 	snap[2][k] = vb[k];
+	// 	snap[3][k] = alpha[k];
+	// }
+	// snapcment_ = cment_;	
 }
 
-int undo() {		/* actually undo/redo */
-	float t;
-	for(int k = 0; k < CMENTMAX; k++) {
-		t = vh[k];       vh[k] = snap[0][k];  snap[0][k] = t;
-		t = vs[k];       vs[k] = snap[1][k];  snap[1][k] = t;
-		t = vb[k];       vb[k] = snap[2][k];  snap[2][k] = t;
-		t = alpha[k]; alpha[k] = snap[3][k];  snap[3][k] = t;
-	}
-	int i = cment_; cment_ = snapcment_; snapcment_ = i;
-	redraw();
-	return 1;
+int CMedit::undo() {		/* actually undo/redo */
+	// float t;
+	// for(int k = 0; k < CMENTMAX; k++) {
+	// 	t = vh[k];       vh[k] = snap[0][k];  snap[0][k] = t;
+	// 	t = vs[k];       vs[k] = snap[1][k];  snap[1][k] = t;
+	// 	t = vb[k];       vb[k] = snap[2][k];  snap[2][k] = t;
+	// 	t = alpha[k]; alpha[k] = snap[3][k];  snap[3][k] = t;
+	// }
+	// int i = cment_; cment_ = snapcment_; snapcment_ = i;
+	// redraw();
+	// return 1;
 }
 
-void init() {
+void CMedit::init() {
 	data_x_min_for_display_ = 0.0;
 	data_x_max_for_display_ = 1.0;
-	data_y_min_for_display_ = 0.0;
-	data_y_max_for_display_ = 1.0;
+	data_y_min_for_hist_display_ = 0.0;
+	data_y_max_for_hist_display_ = 1.0;
+	data_y_min_for_cmap_display_ = 0.0;
+	data_y_max_for_cmap_display_ = 1.0;
 
 	hist_data_x_min_ = 0.0;
 	hist_data_x_max_ = 1.0;
@@ -988,6 +1008,7 @@ void init() {
 
 // hist_x_num_ = 100;
 
+	editing_mode = 1;
 	hist_ent_arr = NULL;
 
 	cment_ = snapcment_ = 256;
@@ -1002,7 +1023,7 @@ void init() {
 
 	hueshift = 0;
 	huezoom = 1;
-	draghue = 0;
+	// draghue = 0;
 
 	ncomments = 0;
 	maxcomments = 8;

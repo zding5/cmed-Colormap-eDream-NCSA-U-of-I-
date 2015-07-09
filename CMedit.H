@@ -53,7 +53,11 @@ public:
 
 
     // **** Getters and Setters
-	int cment(); ///< get number of colormap entries cment_.
+	
+	void getrgba( int index, float rgba[4] ) const;
+	void gethsba( int index, float hsba[4] ) const;
+
+	int cment() const; ///< get number of colormap entries cment_.
 	float get_hist_data_x_min(); ///< getter for the minimum data value (minimum histogram x value).
 	float get_hist_data_x_max(); ///< getter for the maximum data value (minimum histogram x value).
 	float get_hist_data_y_min();
@@ -90,6 +94,7 @@ public:
 	void set_data_y_min_for_cmap_display(float val);
 	void set_data_y_max_for_cmap_display(float val);
 
+	float hist_y_scaler( float dty );
     // **** Getters and Setters END
 
 
@@ -182,6 +187,7 @@ protected:
 
 	// **** Coordinates Parameters
 	int cment_; ///< Number of colormap entries
+	int snapcment_;
 	int data_point_num_; ///< Number of Histogram entries
 	float hist_data_x_min_;
 	float hist_data_x_max_;
@@ -269,6 +275,7 @@ protected:
 	// **** Other Stuffs for now END
 
 	void init(); ///< Initialization function for CMedit Object.
+
 };
 
 

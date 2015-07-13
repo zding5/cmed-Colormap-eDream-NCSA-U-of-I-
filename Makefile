@@ -31,8 +31,13 @@ LIBS        = $(FLTK_LIB) $(GL_LIB) $(X_LIB) $(M_LIB)
 DEFS	    = $(PV_FLAGS)
 INCS	    = $(FLTK_INC)
 OPT	    = -g -O2
-CFLAGS	    = $(OPT) $(DEFS) $(INCS) -g -O2  -I/bd2/shome/spin/zding5/fltk-1.3.3 -I/usr/include/freetype2 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_THREAD_SAFE -D_REENTRANT
-CXXFLAGS    = $(OPT) $(DEFS) $(INCS) -g -O2 -I/bd2/shome/spin/zding5/fltk-1.3.3 -I/usr/include/freetype2 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_THREAD_SAFE -D_REENTRANT
+#OPT			= -g -O0
+# CFLAGS	    = $(OPT) $(DEFS) $(INCS) -g -O2  -I/bd2/shome/spin/zding5/fltk-1.3.3 -I/usr/include/freetype2 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_THREAD_SAFE -D_REENTRANT
+# CXXFLAGS    = $(OPT) $(DEFS) $(INCS) -g -O2 -I/bd2/shome/spin/zding5/fltk-1.3.3 -I/usr/include/freetype2 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_THREAD_SAFE -D_REENTRANT
+
+CFLAGS	    = $(OPT) $(DEFS) $(INCS) $(OPT)  -I/bd2/shome/spin/zding5/fltk-1.3.3 -I/usr/include/freetype2 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_THREAD_SAFE -D_REENTRANT
+CXXFLAGS    = $(OPT) $(DEFS) $(INCS) $(OPT) -I/bd2/shome/spin/zding5/fltk-1.3.3 -I/usr/include/freetype2 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE -D_THREAD_SAFE -D_REENTRANT
+
 
 APP_CSRCS   = hsb.c
 APP_CXXSRCS = cmed.C cmedpanel.C CMedit.C

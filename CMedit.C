@@ -65,13 +65,19 @@
 
 
 // ***** Coordinates Conversion
+/* General Conversion:
+	
+	x2xx( x ) {
+		return (xx_min + x *( xx_range ) / x_range)
+	}
 
+*/
 //windows to drawing
 float CMedit::wx2drx( int wx ) {//pixel coordinate comes in as int
   return (DR_XMIN + wx * ( DR_XW ) / w());
 }
 float CMedit::wy2dry( int wy ) {//pixel coordinate comes in as int
-  return (DR_YMIN + wy * ( DR_YH ) / h());
+  return (DR_YMAX - wy * ( DR_YH ) / h());
 }
 
 //data to drawing
@@ -84,7 +90,7 @@ float CMedit::dty2dry( float dty ) {
 
 //drawing to data
 float CMedit::drx2dtx( float drx ) {
-  return (DTHIST_XMIN + (drx) * ( DTHIST_XW ) / DR_XFROM0);
+  return (DTHIST_XMIN + (drx) * ( DTHIST_XW ) / DR_XFROM0); 
 }
 
 //colormap apply to data
@@ -93,7 +99,7 @@ float CMedit::cmapx2dtx( int cmapx ) {
 }
 
 float CMedit::dispx2dtx( int dispx ) {
-  return (DTHIST_XMIN + ( dispx - DISP_XMIN ) * ( DTHIST_XW ) / DISP_XMIN);
+  return (DTHIST_XMIN + ( dispx - DISP_XMIN ) * ( DTHIST_XW ) / DISP_XW);
 }
 float CMedit::h_dispy2dty( int h_dispy ) {
 	return (HDISP_YMIN + ( h_dispy - HDISP_YMIN ) * ( DTHIST_YH ) / HDISP_YH);
@@ -260,24 +266,27 @@ void CMedit::set_data_y_max_for_cmap_display(float val) {
 // **** I/O Stuffs
 
 int CMedit::cmap_fload( FILE *inf ) {
-	char* line;
+	char* line = NULL;
 	size_t line_size;
 
 	float rgba[4], hsba[4], phsba[4];
 	static enum CMfield flds[4] = { HUE, SAT, BRIGHT, ALPHA };
 
-	int line_number;
+	int line_number = 0;
 	char *buf1, *buf2;
 	int nix;
 	int ix; // ix is the current colormap entry index we are trying to write to.
-	int ox; // ox is the current colormap entry index we are using to output ???
+	int ox = 0; // ox is the current colormap entry index we are using to output ???
 	int prevox; // prevox is the previous ox ???
 	char tc[2]; //for storing color temporarily for specially formatted cmap entry. "No. of entry : RGB"
 	int count = -1;
 
 	int f;
 
+	printf("%s\n", "here");
 	while(getline(&line, &line_size, inf) != -1) {
+		printf("%s\n", "loop");
+		printf("%s\n", line);
 		line_number++;
 		for(buf1 = line; *buf1 && isspace(*buf1); buf1++){
 			//skip potential spaces
@@ -373,6 +382,7 @@ int CMedit::cmap_fload( FILE *inf ) {
 			}
 			prevox = ox;
 			ix++;
+			printf("%s %d\n","ix: ", ix);
 		}
 	}
 
@@ -380,7 +390,8 @@ int CMedit::cmap_fload( FILE *inf ) {
 		fprintf(stderr, "Empty colormap file?\n");
 		return 0;
 	}
-	
+	printf("%d\n", line_number);
+	printf("%d\n", ix);
 	if(ix < count) {
 		fprintf(stderr, "Only got %d colormap entries, expected %d\n", ix, count);
 	}
@@ -417,26 +428,33 @@ int CMedit::cmap_fsave( FILE *outf ) {
 }
 
 int CMedit::hist_fload( FILE *inf ) {
-	char* line;
-	size_t line_size; 
-	char *flag_pointer;
-	int entry_counter;
+	char* line = NULL;
+	size_t line_size;
+	char *flag_pointer = NULL;
+	int entry_counter = 0;
 	int maxmax;
 
 	getline(&line, &line_size, inf);
-	data_point_num_ = atoi(line);
 
 	getline(&line, &line_size, inf);
-	hist_data_x_max_ = atoi(line);
+	// hist_data_x_max_ = atoi(line);
+	hist_data_x_min_ = atoi(strtok(line, " "));
+	hist_data_x_max_ = atoi(strtok(NULL, " "));
 	data_x_max_for_cmap_ = hist_data_x_max_;
 	data_x_max_for_display_ = hist_data_x_max_;
-	
-	hist_ent_arr = (float*) malloc(hist_data_x_max_ * sizeof(float));
 
-	for (int i=0; i<hist_data_x_max_; i++) {
+	getline(&line, &line_size, inf);
+	data_point_num_ = atoi(line);
+	printf("%d\n", data_point_num_);
+
+	hist_ent_arr = (float*) malloc(data_point_num_ * sizeof(float));
+
+	for (int i=0; i<data_point_num_; i++) {
     	getline(&line, &line_size, inf);
+    	// printf("%s\n", line);
 		strtok(line, " ");
 		hist_ent_arr[i] = atof(strtok(NULL, " "));
+		printf("%f", hist_ent_arr[i]);
 		maxmax = (hist_ent_arr[i]>maxmax)?hist_ent_arr[i]:maxmax;
 	}
 
@@ -490,6 +508,7 @@ void CMedit::draw() {
 		glBegin(GL_QUADS);
 		// for (i = HIST_XMIN; i<=HIST_XMAX-1; i++) { ...
 		for (i = DTHIST_XMIN; i<=DTHIST_XMAX-1; i++) {
+			printf("%d, %f, %f\n",i, dispx2dtx(i), dtx2drx(i) );
 
 			glColor3f( 0,0,0 );
 			glVertex2f( dtx2drx(dispx2dtx(i)), 0.0 );
@@ -990,12 +1009,6 @@ int CMedit::undo() {		/* actually undo/redo */
 }
 
 void CMedit::init() {
-	data_x_min_for_display_ = 0.0;
-	data_x_max_for_display_ = 1.0;
-	data_y_min_for_hist_display_ = 0.0;
-	data_y_max_for_hist_display_ = 1.0;
-	data_y_min_for_cmap_display_ = 0.0;
-	data_y_max_for_cmap_display_ = 1.0;
 
 	hist_data_x_min_ = 0.0;
 	hist_data_x_max_ = 1.0;
@@ -1007,14 +1020,21 @@ void CMedit::init() {
 	data_y_min_for_cmap_ = 0.0;
 	data_y_max_for_cmap_ = 1.0;
 
-// hist_x_num_ = 100;
+
+	data_x_min_for_display_ = 0.0;
+	data_x_max_for_display_ = 1.0;
+
+	data_y_min_for_hist_display_ = 0.0;
+	data_y_max_for_hist_display_ = 1.0;
+	data_y_min_for_cmap_display_ = 0.0;
+	data_y_max_for_cmap_display_ = 1.0;
 
 	editing_mode = 1;
 	hist_ent_arr = NULL;
 
 	cment_ = snapcment_ = 256;
-// remin = 0;  remax = cment()-1;
-
+	remin = 0;
+	remax = cment()-1;
 
 	lerpval = 0.5;
 	hsbmode = 1;

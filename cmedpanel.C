@@ -276,12 +276,12 @@ Fl_Double_Window* make_zoom_panel() {
       { Fl_Slider* o = y_display_range_min_slider = new Fl_Slider(590, 234, 20, 98);
         y_display_range_min_slider->type(4);
         y_display_range_min_slider->callback((Fl_Callback*)y_display_range_min_slider_cb);
-        o->value(o->minimum());
+        o->value(o->maximum());
       } // Fl_Slider* y_display_range_min_slider
       { Fl_Slider* o = y_cmap_range_min_slider = new Fl_Slider(470, 235, 20, 98);
         y_cmap_range_min_slider->type(4);
         y_cmap_range_min_slider->callback((Fl_Callback*)y_cmap_range_min_slider_cb);
-        o->value(o->minimum());
+        o->value(o->maximum());
       } // Fl_Slider* y_cmap_range_min_slider
       { y_display_range_max_slider = new Fl_Slider(590, 120, 20, 98);
         y_display_range_max_slider->type(4);

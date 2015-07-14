@@ -187,23 +187,24 @@ protected:
 
 	// **** Coordinates Parameters
 	int cment_; ///< Number of colormap entries
-	int snapcment_;
-	int data_point_num_; ///< Number of Histogram entries
-	float hist_data_x_min_;
-	float hist_data_x_max_;
-	float hist_data_y_min_;
-	float hist_data_y_max_;
+	int hisent_; ///< Number of Histogram entries
+	// The above two are integers.
 
-	float data_x_min_for_cmap_;
-	float data_x_max_for_cmap_;
-	float data_y_min_for_cmap_;
+	int snapcment_;
+	float hist_data_x_min_; ///< The minimum value for real data range which is also the range for whole histogram.
+	float hist_data_x_max_; ///< The maximum value for real data range which is also the range for whole histogram
+	float hist_data_y_min_; ///< The minimum height of histogram
+	float hist_data_y_max_; ///< The maximum height of histogram
+
+	float data_x_min_for_cmap_; ///< The minimum value in data range to which the colormap apply.
+	float data_x_max_for_cmap_; ///< The maximum value in data range to which the colormap apply.
+	float data_y_min_for_cmap_; 
 	float data_y_max_for_cmap_;
 
+	float data_x_min_for_display_; ///< The minimum value in data range which part of histgram & cmap we want to display.
+	float data_x_max_for_display_; ///< The maximum value in data range which part of histgram & cmap we want to display.
 
-	float data_x_min_for_display_;
-	float data_x_max_for_display_;
-
-	float data_y_min_for_hist_display_;
+	float data_y_min_for_hist_display_; ///< 
 	float data_y_max_for_hist_display_;
 	float data_y_min_for_cmap_display_;
 	float data_y_max_for_cmap_display_;
@@ -219,34 +220,26 @@ protected:
 	// **** Coordinates Transformations
 
 	//windows to drawing
-	float wx2drx( int wx ); ///< Window coord x to drawing coord x.
-	float wy2dry( int wy ); ///< Window coord y to drawing coord y.
+	float wx2drx( int wx ); ///< pixel coordinate comes in as int
 
-	//data to drawing
-	float dtx2drx( float dtx ); ///< Data(Histogram) coord x to drawing coord x.
-	float dty2dry( float dty ); ///< Data(Histogram) coord y to drawing coord y.
+	float wy2dry( int wy ); ///< pixel coordinate comes in as int
 
-	//drawing to data
-	float drx2dtx( float drx ); ///< Drawing coord x to data(histogram) coord x.
+	float dtx2drx( float dtx ); // data to drawing (Actually only converting the displaying part, between DISP_XMIN and DISP_XMAX, to drawing)
 
+	float hdty2dry( float hdty ); // data to drawing (Actually only converting the displaying part, between HDISP_YMIN and HDISP_YMAX, to drawing)
 
-	//histogram to data
-	float dispx2dtx( int dispx ); ///< Histogram coord(Histogram Display) x to data coord x.
-	float h_dispy2dty( int h_dispy ); ///< Histogram coord(Histogram Display) y to data coord y.
-	float c_dispy2dty( int c_dispy );
+	float cdty2dry( float cdty );
 
+	float drx2dtx( float drx ); ///< drawing to data ( Actually to data range for display, between DISP_XMIN and DISP_XMAX I think ... )
 
-	//colormap to data
-	float cmapx2dtx( int cmapx ); ///< Cmap coord x to data coord x.
-	// float cmapy2dty( int cmapy ); ///< Cmap coord y to data coord y.
+	float cmapx2dtx( int cmapx ); ///< colormap to data ( Actually the cmap entries to data range which the cmap apply to )
 
-	//data to colormap
+	float histx2dtx( int histx ); ///< histogram to data ( hist entries to data range )
+
 	int dtx2cmapx( float dtx ); ///< Data(Histogram) coord x to cmap coord x.
 
-	//data to histogram
-	// int dtx2dispx( float dtx );	///< Data(Histogram) coord x to histogram(Histogram Display) coord x.
-
 	float hist_display_y_scaler( float dty ); ///< Scaler for histogram display in y axis.
+
 
 
 	// **** Coordinates Transformations END

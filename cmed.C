@@ -358,14 +358,15 @@ void y_cmap_range_min_slider_cb(Fl_Slider* fl, void*) {
 void y_display_range_max_slider_cb(Fl_Slider* fl, void*) {
   fl->bounds( cmedit->get_hist_data_y_max(), cmedit->get_hist_data_y_min() );
 
-  // cmedit->set_data_y_max_for_display(fl->value());
+  cmedit->set_data_y_max_for_hist_display(fl->value());
+  // data_y_min_for_hist_display_
   y_display_range_max_box->value(fl->value());
   cmedit->redraw();
 }
 
 void y_display_range_min_slider_cb(Fl_Slider* fl, void*) {
   fl->bounds( (cmedit->get_hist_data_y_max() - cmedit->get_hist_data_y_min() ) / 2, cmedit->get_hist_data_y_min() );
-  // cmedit->set_data_y_min_for_display(fl->value());
+  cmedit->set_data_y_min_for_hist_display(fl->value());
   y_display_range_min_box->value(fl->value());
   cmedit->redraw();
 }

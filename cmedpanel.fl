@@ -230,7 +230,7 @@ Max:}
         xywh {470 122 20 98} type {Vert Knob}
       }
       Fl_Slider y_display_range_min_slider {
-        callback y_display_range_min_slider_cb selected
+        callback y_display_range_min_slider_cb
         xywh {590 234 20 98} type {Vert Knob}
         code0 {o->value(o->maximum());}
       }
@@ -240,7 +240,7 @@ Max:}
         code0 {o->value(o->maximum());}
       }
       Fl_Slider y_display_range_max_slider {
-        callback y_display_range_max_slider_cb
+        callback y_display_range_max_slider_cb selected
         xywh {590 120 20 98} type {Vert Knob}
       }
     }

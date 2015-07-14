@@ -17,12 +17,9 @@
 #define  DTHIST_XW    (DTHIST_XMAX-DTHIST_XMIN)
 #define  DTHIST_YMIN  hist_data_y_min_
 #define  DTHIST_YMAX  hist_data_y_max_
-#define  DTHIST_YH    (DTHIST_YMAX-DTHIST_YMAX)
+#define  DTHIST_YH    (DTHIST_YMAX-DTHIST_YMIN)
 
 
-#define  CMAP_XMIN  0
-#define  CMAP_XMAX  cment_
-#define  CMAP_XW     (CMAP_XMAX-CMAP_XMIN)
 #define  CMAP_YMIN  0
 #define  CMAP_YMAX  cmap_y_max_
 #define  CMAP_YH    (CMAP_YMAX-CMAP_YMIN)
@@ -72,7 +69,7 @@
 	}
 
 */
-//windows to drawing
+// windows to drawing
 float CMedit::wx2drx( int wx ) {//pixel coordinate comes in as int
   return (DR_XMIN + wx * ( DR_XW ) / w());
 }
@@ -80,44 +77,46 @@ float CMedit::wy2dry( int wy ) {//pixel coordinate comes in as int
   return (DR_YMAX - wy * ( DR_YH ) / h());
 }
 
-//data to drawing
+// data to drawing (Actually only converting the displaying part, between DISP_XMIN and DISP_XMAX, to drawing)
 float CMedit::dtx2drx( float dtx ) {
-  return (( dtx - DTHIST_XMIN ) * ( DR_XFROM0 ) / DTHIST_XW);
-}
-float CMedit::dty2dry( float dty ) {
-  return (( dty - DTHIST_YMIN ) * ( DR_YFROM0 ) / DTHIST_YH);
+  // return (( dtx - DTHIST_XMIN ) * ( DR_XFROM0 ) / DTHIST_XW);
+	return ( 0 + ( dtx - DISP_XMIN ) * ( DR_XFROM0 ) / DISP_XW );
+
+}// data to drawing (Actually only converting the displaying part, between HDISP_YMIN and HDISP_YMAX, to drawing)
+float CMedit::hdty2dry( float hdty ) {
+  return ( 0 + ( hdty - HDISP_YMIN ) * ( DR_YFROM0 ) / HDISP_YH );
 }
 
-//drawing to data
+float CMedit::cdty2dry( float cdty ) {
+	return ( 0 + ( cdty - CDISP_YMIN ) * ( DR_YFROM0 ) / CDISP_YH );
+}
+
+// drawing to data ( Actually to data range for display, between DISP_XMIN and DISP_XMAX I think ... )
 float CMedit::drx2dtx( float drx ) {
-  return (DTHIST_XMIN + (drx) * ( DTHIST_XW ) / DR_XFROM0); 
+  return ( DISP_XMIN + (drx) * ( DISP_XW ) / DR_XFROM0 ); 
 }
 
-//colormap apply to data
+// colormap to data ( Actually the cmap entries to data range which the cmap apply to )
 float CMedit::cmapx2dtx( int cmapx ) {
-	return (CMAPAPP_XMIN + (cmapx - CMAP_XMIN) * ( CMAPAPP_XW ) / CMAP_XW);
+	return ( CMAPAPP_XMIN + (cmapx) * ( CMAPAPP_XW ) / cment_ );
 }
 
-float CMedit::dispx2dtx( int dispx ) {
-  return (DTHIST_XMIN + ( dispx - DISP_XMIN ) * ( DTHIST_XW ) / DISP_XW);
+// histogram to data ( hist entries to data range )
+float CMedit::histx2dtx( int histx ) {
+	return ( DTHIST_XMIN + ( histx ) * ( DTHIST_XW ) / hisent_ );
 }
-float CMedit::h_dispy2dty( int h_dispy ) {
-	return (HDISP_YMIN + ( h_dispy - HDISP_YMIN ) * ( DTHIST_YH ) / HDISP_YH);
-}
-float CMedit::c_dispy2dty( int c_dispy ) {
-	return (CDISP_YMIN + ( c_dispy - CDISP_YMIN ) * ( DTHIST_YH ) / CDISP_YH );
-}
+
 
 //data to colormap
 int CMedit::dtx2cmapx( float dtx ) {
   if (dtx < CMAPAPP_XMIN) {
-    return CMAP_XMIN-1;
+    return -1;
   }
   else if (dtx > CMAPAPP_XMAX) {
-    return CMAP_XMAX+1;
+    return cment_ + 1;
   }
   else {
-    int cmap_ind = (int) ( CMAP_XMIN + (dtx - CMAPAPP_XMIN) * ( CMAP_XW ) / CMAPAPP_XW);
+    int cmap_ind = (int) ( 0 + (dtx - CMAPAPP_XMIN) * ( cment_ ) / CMAPAPP_XW);
     return cmap_ind;
   }
 }
@@ -125,7 +124,7 @@ int CMedit::dtx2cmapx( float dtx ) {
 
 //Histogram y scaler. Will have more options later on I think
 float CMedit::hist_y_scaler( float dty ) {
-	return dty2dry(dty);
+	return hdty2dry(dty);
 } 
 
 // ***** Coordinates Conversion END
@@ -437,21 +436,20 @@ int CMedit::hist_fload( FILE *inf ) {
 	getline(&line, &line_size, inf);
 
 	getline(&line, &line_size, inf);
-	// hist_data_x_max_ = atoi(line);
 	hist_data_x_min_ = atoi(strtok(line, " "));
 	hist_data_x_max_ = atoi(strtok(NULL, " "));
+
 	data_x_max_for_cmap_ = hist_data_x_max_;
 	data_x_max_for_display_ = hist_data_x_max_;
 
 	getline(&line, &line_size, inf);
-	data_point_num_ = atoi(line);
-	printf("%d\n", data_point_num_);
+	hisent_ = atoi(line);
+	printf("%d\n", hisent_);
 
-	hist_ent_arr = (float*) malloc(data_point_num_ * sizeof(float));
+	hist_ent_arr = (float*) malloc(hisent_ * sizeof(float));
 
-	for (int i=0; i<data_point_num_; i++) {
+	for (int i=0; i<hisent_; i++) {
     	getline(&line, &line_size, inf);
-    	// printf("%s\n", line);
 		strtok(line, " ");
 		hist_ent_arr[i] = atof(strtok(NULL, " "));
 		printf("%f", hist_ent_arr[i]);
@@ -480,7 +478,6 @@ void CMedit::draw() {
 		valid(1);
 		remin = DR_XMIN; // ???
 		remax = DR_XMAX;
-		// If 
 
 		glViewport( 0, 0, w(), h() );
 		glMatrixMode( GL_PROJECTION );
@@ -506,40 +503,33 @@ void CMedit::draw() {
 
 	if(hist_ent_arr!=NULL) {
 		glBegin(GL_QUADS);
-		// for (i = HIST_XMIN; i<=HIST_XMAX-1; i++) { ...
-		for (i = DTHIST_XMIN; i<=DTHIST_XMAX-1; i++) {
-			printf("%d, %f, %f\n",i, dispx2dtx(i), dtx2drx(i) );
+		for (i = 0; i<=hisent_; i++) {
+			printf("%d, %f, %f\n",i, histx2dtx(i), dtx2drx(i) );
 
 			glColor3f( 0,0,0 );
-			glVertex2f( dtx2drx(dispx2dtx(i)), 0.0 );
-			glVertex2f( dtx2drx(dispx2dtx(i)), dty2dry(hist_ent_arr[i]) );
-			glVertex2f( dtx2drx(dispx2dtx(i+1)), dty2dry(hist_ent_arr[i]) );
-			glVertex2f( dtx2drx(dispx2dtx(i+1)), 0.0 );
+			glVertex2f( dtx2drx(histx2dtx(i)), 0.0 );
+			glVertex2f( dtx2drx(histx2dtx(i)), hdty2dry(hist_ent_arr[i]) );
+			glVertex2f( dtx2drx(histx2dtx(i+1)), hdty2dry(hist_ent_arr[i]) );
+			glVertex2f( dtx2drx(histx2dtx(i+1)), 0.0 );
 
 			glColor3f( 1,1,1 );
-			glVertex2f( dtx2drx(dispx2dtx(i)), YBAR0 );
-			glVertex2f( dtx2drx(dispx2dtx(i)), 0.0 );
-			glVertex2f( dtx2drx(dispx2dtx(i+1)), 0.0 );
-			glVertex2f( dtx2drx(dispx2dtx(i+1)), YBAR0 );
+			glVertex2f( dtx2drx(histx2dtx(i)), YBAR0 );
+			glVertex2f( dtx2drx(histx2dtx(i)), 0.0 );
+			glVertex2f( dtx2drx(histx2dtx(i+1)), 0.0 );
+			glVertex2f( dtx2drx(histx2dtx(i+1)), YBAR0 );
 			// This is supposed to draw thin strips indicating where there are data there.
-			// What would happen when scaling???
 
 		}
 		glEnd();
-
 		glBegin(GL_QUADS);
-		// for (i = HIST_XMIN; i<=HIST_XMAX-1; i++) { ...
-		for (i = DTHIST_XMIN; i<=DTHIST_XMAX-1; i++) {
+		for (i = 0; i <= hisent_; i++) {
 			float rgb[3];
-			// float j = histx2dtx(i);
-			// float k = histx2dtx(i+1);
-			float j = dispx2dtx(i);
-			float k = dispx2dtx(i+1);
+			float j = histx2dtx(i);
+			float k = histx2dtx(i+1);
 
-			// if (j >= DTCMAP_XMIN && j <= DTCMAP_XMAX){
 			if (j >= CMAPAPP_XMIN && j <= CMAPAPP_XMAX){
 
-				hsb2rgb(vh[ dtx2cmapx(dispx2dtx(i)) ], vs[ dtx2cmapx(dispx2dtx(i)) ], vb[ dtx2cmapx(dispx2dtx(i)) ], &rgb[0], &rgb[1], &rgb[2]);
+				hsb2rgb(vh[ dtx2cmapx(histx2dtx(i)) ], vs[ dtx2cmapx(histx2dtx(i)) ], vb[ dtx2cmapx(histx2dtx(i)) ], &rgb[0], &rgb[1], &rgb[2]);
 			}
 
 			else {
@@ -549,11 +539,11 @@ void CMedit::draw() {
 			}
 
 			glColor3fv( rgb );
-			glVertex2f( dtx2drx(dispx2dtx(i)), 0.0 );
-			glVertex2f( dtx2drx(dispx2dtx(i)), dty2dry(hist_ent_arr[i]) );
-			glVertex2f( dtx2drx(dispx2dtx(i+1)), dty2dry(hist_ent_arr[i]) );
-			glVertex2f( dtx2drx(dispx2dtx(i+1)), 0.0 );
-		}	
+			glVertex2f( dtx2drx(histx2dtx(i)), 0.0 );
+			glVertex2f( dtx2drx(histx2dtx(i)), hdty2dry(hist_ent_arr[i]) );
+			glVertex2f( dtx2drx(histx2dtx(i+1)), hdty2dry(hist_ent_arr[i]) );
+			glVertex2f( dtx2drx(histx2dtx(i+1)), 0.0 );
+		}
 		glEnd();
 	}
 
@@ -566,8 +556,7 @@ void CMedit::draw() {
 	glVertex2f( remin, -.05 );
 	glVertex2f( remax+1, -.05 );
 	glColor3f( 1,1,1 );
-	// glVertex2f( remax+1, YMIN );
-	// glVertex2f( remin, YMIN );
+
 	glVertex2f( remax+1, DR_YMIN );
 	glVertex2f( remin, DR_YMIN );
 
@@ -583,7 +572,7 @@ void CMedit::draw() {
 		glColor3f( 1,1,0 ); /* Hue: yellow */
 		float midhue = y2hue(.5);
 		glBegin( GL_LINE_STRIP );
-		for(i = CMAP_XMIN; i <= CMAP_XMAX-1; i++) {
+		for(i = 0; i <= cment_-1; i++) {
 			v = hue2y( huenear( vh[i], midhue ) ); //Need to worry about vh stuffs???
 			glVertex2f( dtx2drx(cmapx2dtx(i)),  v);
 	 		if(coarse) glVertex2f( dtx2drx(cmapx2dtx(i+1)), v );
@@ -592,7 +581,7 @@ void CMedit::draw() {
 
 		glColor3f( .3,1,.25 );  /* Saturation: teal */
 		glBegin( GL_LINE_STRIP );
-		for(i = CMAP_XMIN; i <= CMAP_XMAX-1; i++) {
+		for(i = 0; i <= cment_-1; i++) {
 			glVertex2f( dtx2drx(cmapx2dtx(i)), vs[i] );
 			if(coarse) glVertex2f( dtx2drx(cmapx2dtx(i+1)), vs[i] );
 		}
@@ -600,7 +589,7 @@ void CMedit::draw() {
 
 		glColor3f( .5,.2,1 );  /* Brightness: purple */
 		glBegin( GL_LINE_STRIP );
-		for(i = CMAP_XMIN; i <= CMAP_XMAX-1; i++) {
+		for(i = 0; i <= cment_-1; i++) {
 			glVertex2f( dtx2drx(cmapx2dtx(i)), vb[i] );
 			if(coarse) glVertex2f( dtx2drx(cmapx2dtx(i+1)), vb[i] );
 		}
@@ -610,13 +599,13 @@ void CMedit::draw() {
 	else {
 		float r[CMENTMAX], g[CMENTMAX], b[CMENTMAX];
 
-		for(i = CMAP_XMIN; i <= CMAP_XMAX-1; i++) {
+		for(i = 0; i <= cment_-1; i++) {
 			hsb2rgb( vh[i], vs[i], vb[i], &r[i], &g[i], &b[i] );    
 		}
 
 		glColor3f( 1,0,0 ); /* red */
 		glBegin( GL_LINE_STRIP );
-		for(i = CMAP_XMIN; i <= CMAP_XMAX-1; i++) {
+		for(i = 0; i <= cment_-1; i++) {
 			glVertex2f( dtx2drx(cmapx2dtx(i)), r[i] );
 			if(coarse) glVertex2f( dtx2drx(cmapx2dtx(i+1)), r[i] );
 			printf("%d | %f | %f\n", i, cmapx2dtx(i+1), dtx2drx(cmapx2dtx(i+1)));
@@ -625,7 +614,7 @@ void CMedit::draw() {
 
 		glColor3f( 0,1,0 );  /* green */
 		glBegin( GL_LINE_STRIP );
-		for(i = CMAP_XMIN; i <= CMAP_XMAX-1; i++) {
+		for(i = 0; i <= cment_-1; i++) {
 			glVertex2f( dtx2drx(cmapx2dtx(i)), g[i] );
 			if(coarse) glVertex2f( dtx2drx(cmapx2dtx(i+1)), g[i] );
 		}
@@ -633,7 +622,7 @@ void CMedit::draw() {
 
 		glColor3f( 0,0,1 );  /* blue */
 		glBegin( GL_LINE_STRIP );
-		for(i = CMAP_XMIN; i <= CMAP_XMAX-1; i++) {
+		for(i = 0; i <= cment_-1; i++) {
 			glVertex2f( dtx2drx(cmapx2dtx(i)), b[i] );
 			if(coarse) glVertex2f( dtx2drx(cmapx2dtx(i+1)), b[i] );
 		}
@@ -642,7 +631,7 @@ void CMedit::draw() {
 
 	glColor3f( .7,.7,.7 );  /* alpha: gray */
 	glBegin( GL_LINE_STRIP );
-	for(i = CMAP_XMIN; i <= CMAP_XMAX-1; i++) {
+	for(i = 0; i <= cment_-1; i++) {
 		glVertex2f( dtx2drx(cmapx2dtx(i)), alpha[i] );
 		if(coarse) {
 			glVertex2f( dtx2drx(cmapx2dtx(i+1)), alpha[i] );
@@ -653,7 +642,7 @@ void CMedit::draw() {
 	glDisable( GL_BLEND );
 	glShadeModel( GL_SMOOTH );
 	glBegin( GL_QUAD_STRIP );  //upper bottom strips
-	for(i = CMAP_XMIN; i <= CMAP_XMAX-1; i++) {
+	for(i = 0; i <= cment_-1; i++) {
 		float rgb[3];
 		hsb2rgb( vh[i], vs[i], vb[i], &rgb[0],&rgb[1],&rgb[2] );
 		glColor3fv( rgb );
@@ -670,7 +659,7 @@ void CMedit::draw() {
 	glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	glShadeModel( GL_SMOOTH );
 	glBegin( GL_QUAD_STRIP );  //lower bottom strips
-	for(i = CMAP_XMIN; i <= CMAP_XMAX-1; i++) {
+	for(i = 0; i <= cment_-1; i++) {
 		float rgba[4];
 		hsb2rgb( vh[i], vs[i], vb[i], &rgba[0],&rgba[1],&rgba[2] );
 		rgba[3] = alpha[i];

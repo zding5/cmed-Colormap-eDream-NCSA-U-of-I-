@@ -96,6 +96,10 @@ float CMedit::drx2dtx( float drx ) {
   return ( DISP_XMIN + (drx) * ( DISP_XW ) / DR_XFROM0 ); 
 }
 
+float CMedit::dry2hdty( float dry ) {
+	return ( HDISP_YMIN + (dry) * ( HDISP_YH ) / DR_YFROM0 );
+}
+
 // colormap to data ( Actually the cmap entries to data range which the cmap apply to )
 float CMedit::cmapx2dtx( int cmapx ) {
 	return ( CMAPAPP_XMIN + (cmapx) * ( CMAPAPP_XW ) / cment_ );
@@ -755,19 +759,24 @@ int CMedit::handle_drawing(int ev) {
 			dragfield = btn2field[ hsbmode ][ btn-1 ];
 		}
 
-		if(Fl::event_key('l')) {
-		/*...*/
-		}
-		else if(Fl::event_key('r')) {
-		/*...*/
-		}
-		else {
-			snapshot();
-		}
+		// if(Fl::event_key('l')) {
+		// /*...*/
+		// }
+		// else if(Fl::event_key('r')) {
+		// /*...*/
+		// }
+		// else {
+		// 	snapshot();
+		// }
 		// What is going on here ???
+		return 1;
+
+
 
 		case FL_DRAG:
 		case FL_RELEASE:
+
+
 
 		#ifdef NOTYET
 		if(draghue) {
@@ -816,7 +825,81 @@ int CMedit::handle_drawing(int ev) {
 }
 
 int CMedit::handle_zooming(int ev) {
+	
+	float x = wx2drx( Fl::event_x() );
+	float y = wy2dry( Fl::event_y() );
+	int btn = 1;
+
+	switch(ev) {
+		case FL_PUSH:
+		dragfrom_x = x;
+		dragfrom_y = y;
+
+		// dragamount = 0;
+
+		btn = 1; // Left click
+		mouse_btn = btn;
+		if(Fl::event_state(FL_BUTTON3 | FL_META)) {
+			btn = 3; // Right click
+			mouse_btn = btn;
+		}
+
+		case FL_DRAG:
+		case FL_RELEASE:
+		// printf("%d \n", btn);
+		if (mouse_btn == 1) {
+			fluid_moving(dragfrom_x, x, dragfrom_y, y);
+			dragfrom_x = x;
+			dragfrom_y = y;
+			return 1;
+		}
+
+		else if (mouse_btn == 3) {
+			fluid_zooming(dragfrom_x, x, dragfrom_y, y);
+			dragfrom_x = x;
+			dragfrom_y = y;
+			return 1;
+		}
+	}
 	return 0;
+
+}
+
+
+void CMedit::fluid_moving( float x0, float x1, float y0, float y1 ) {
+	// printf("%s\n", "zooming !!");
+	float change_x = (drx2dtx(x0) - drx2dtx(x1));
+	float change_y = (dry2hdty(y0) - dry2hdty(y1));
+
+	// printf("%f, %f, %f\n", drx2dtx(x0), drx2dtx(x1), change_x);
+	data_x_min_for_display_ += change_x;
+	data_x_max_for_display_ += change_x;
+
+	data_y_min_for_hist_display_ += change_y;
+	data_y_max_for_hist_display_ += change_y;
+
+
+	printf("data x for display: %f, %f\n", data_x_min_for_display_, data_x_max_for_display_);
+	
+	updaterange();
+	redraw();
+}
+
+
+void CMedit::fluid_zooming( float x0, float x1, float y0, float y1 ) {
+	
+	float change_x = (drx2dtx(x0) - drx2dtx(x1));
+	float change_y = (dry2hdty(y0) - dry2hdty(y1));
+
+	// printf("%f, %f, %f\n", drx2dtx(x0), drx2dtx(x1), change_x);
+	data_x_min_for_display_ -= change_x;
+	data_x_max_for_display_ += change_x;
+
+	data_y_min_for_hist_display_ -= change_y;
+	data_y_max_for_hist_display_ += change_y;
+
+	updaterange();
+	redraw();
 }
 
 int CMedit::handle_interpolation(int ev) {
@@ -1018,7 +1101,7 @@ void CMedit::init() {
 	data_y_min_for_cmap_display_ = 0.0;
 	data_y_max_for_cmap_display_ = 1.0;
 
-	editing_mode = 1;
+	editing_mode = 2;
 	hist_ent_arr = NULL;
 
 	cment_ = snapcment_ = 256;

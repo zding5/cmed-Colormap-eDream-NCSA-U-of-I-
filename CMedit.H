@@ -122,7 +122,8 @@ public:
 	float drag_drawing( int index, enum CMfield field, float value, float lerp = 1.0 );
 	void dragrange( int x0, int x1, enum CMfield field, float v0, float v1, float lerp = 1.0 ); //what for?
 
-
+	void fluid_moving( float x0, float x1, float y0, float y1 );
+	void fluid_zooming( float x0, float x1, float y0, float y1 );
 	// **** Mouse/Keyboard Handling END
 
 
@@ -177,6 +178,13 @@ protected:
 	int dragamount;
 	float dragval;
 	//int draghue;
+	
+
+	float dragfrom_x;
+	float dragfrom_y;
+
+	int mouse_btn;
+
 	float hueshift, huezoom;
 
 	char **comments;
@@ -231,6 +239,8 @@ protected:
 	float cdty2dry( float cdty );
 
 	float drx2dtx( float drx ); ///< drawing to data ( Actually to data range for display, between DISP_XMIN and DISP_XMAX I think ... )
+
+	float dry2hdty( float dry );
 
 	float cmapx2dtx( int cmapx ); ///< colormap to data ( Actually the cmap entries to data range which the cmap apply to )
 

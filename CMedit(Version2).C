@@ -724,7 +724,7 @@ int CMedit::handle_drawing(int ev) {
 	int xmin, xmax;
 
 	switch(ev) {
-		case FL_SHORTCUT: // undo
+		case FL_SHORTCUT: // undo // take 'u' as undo even when drawing window loses focus.
 		if(Fl::event_key() == 'u') {
 			undo();
 			return 1;
@@ -742,10 +742,10 @@ int CMedit::handle_drawing(int ev) {
 		else {
 		// Which button?  Take account of alt/meta modifiers too.
 			int btn = 1;
-			if(Fl::event_state(FL_BUTTON2 | FL_ALT)) {
+			if(Fl::event_state(FL_BUTTON2 | FL_ALT)) { // middle mouse button or alt
 				btn = 2;
 			}
-			else if(Fl::event_state(FL_BUTTON3 | FL_META)) {
+			else if(Fl::event_state(FL_BUTTON3 | FL_META)) { // right mouse button or meta key
 				btn = 3;
 			}
 			static CMfield btn2field[2][3] = {

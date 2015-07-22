@@ -33,8 +33,8 @@
 #define  DR_XMIN    (-1/16.f)
 #define  DR_XMAX    (1.0)
 #define  DR_XW      (DR_XMAX-DR_XMIN)
-#define  DR_XZERO   (0.0)
-#define  DR_XFROM0  (DR_XMAX-DR_XZERO)  
+#define  DR_X0   	(0.0)
+#define  DR_XFROM0  (DR_XMAX-DR_X0)  
 //Y
 #define  DR_YMIN    (-0.25)
 #define  DR_YMAX    (1.0)
@@ -502,29 +502,29 @@ void CMedit::draw() {
 	glDisable( GL_LIGHTING );
 	glDisable( GL_TEXTURE_2D );
 	glDisable( GL_COLOR_MATERIAL );
+	glDisable( GL_BLEND );
+
+	glScissor( (w()/17.0), (h()*0.25/1.25), (16*w()/17.0), (h()/1.25) );
+
 
 	//***histogram part=========================
-
 	if(hist_ent_arr!=NULL) {
+
+		glEnable( GL_SCISSOR_TEST );
 		glBegin(GL_QUADS);
 		for (i = 0; i<=hisent_; i++) {
 			printf("%d, %f, %f\n",i, histx2dtx(i), dtx2drx(i) );
 
+// 
 			glColor3f( 0,0,0 );
 			glVertex2f( dtx2drx(histx2dtx(i)), 0.0 );
 			glVertex2f( dtx2drx(histx2dtx(i)), hdty2dry(hist_ent_arr[i]) );
 			glVertex2f( dtx2drx(histx2dtx(i+1)), hdty2dry(hist_ent_arr[i]) );
 			glVertex2f( dtx2drx(histx2dtx(i+1)), 0.0 );
 
-			glColor3f( 1,1,1 );
-			glVertex2f( dtx2drx(histx2dtx(i)), YBAR0 );
-			glVertex2f( dtx2drx(histx2dtx(i)), 0.0 );
-			glVertex2f( dtx2drx(histx2dtx(i+1)), 0.0 );
-			glVertex2f( dtx2drx(histx2dtx(i+1)), YBAR0 );
-			// This is supposed to draw thin strips indicating where there are data there.
-
 		}
 		glEnd();
+
 		glBegin(GL_QUADS);
 		for (i = 0; i <= hisent_; i++) {
 			float rgb[3];
@@ -549,6 +549,29 @@ void CMedit::draw() {
 			glVertex2f( dtx2drx(histx2dtx(i+1)), 0.0 );
 		}
 		glEnd();
+
+		glDisable( GL_SCISSOR_TEST );
+
+
+		glBegin(GL_QUADS);
+		for (i = 0; i <= hisent_; i++) {
+			glColor3f( 1,1,1 );
+			glVertex2f( dtx2drx(histx2dtx(i)), YBAR0 );
+			glVertex2f( dtx2drx(histx2dtx(i)), 0.0 );
+			glVertex2f( dtx2drx(histx2dtx(i+1)), 0.0 );
+			glVertex2f( dtx2drx(histx2dtx(i+1)), YBAR0 );
+			// This is supposed to draw thin strips indicating where there are data there.
+		}
+
+
+		// glBegin(GL_QUADS);
+		// glColor3f( 0,0,0 );
+		// glVertex2f( DR_XMIN, YBAR0 );
+		// glVertex2f( DR_XMIN, DR_YMIN );
+		// glVertex2f( DR_XMAX, DR_YMIN );
+		// glVertex2f( DR_XMAX, YBAR0 );
+		// glEnd();
+
 	}
 
 	//*** histogram part END =========================
@@ -875,9 +898,16 @@ void CMedit::fluid_moving( float x0, float x1, float y0, float y1 ) {
 	data_x_min_for_display_ += change_x;
 	data_x_max_for_display_ += change_x;
 
-	data_y_min_for_hist_display_ += change_y;
-	data_y_max_for_hist_display_ += change_y;
-
+	// Guarantee that the bottom of the histograms does not go higher than needed (>0)
+	if (hist_data_y_min_ < data_y_min_for_hist_display_ + change_y) { 
+		data_y_min_for_hist_display_ += change_y;
+		data_y_max_for_hist_display_ += change_y;
+	}
+	else {
+		change_y = (hist_data_y_min_ - data_y_min_for_hist_display_);
+		data_y_min_for_hist_display_ += change_y;
+		data_y_max_for_hist_display_ += change_y;
+	}
 
 	printf("data x for display: %f, %f\n", data_x_min_for_display_, data_x_max_for_display_);
 	
@@ -895,7 +925,7 @@ void CMedit::fluid_zooming( float x0, float x1, float y0, float y1 ) {
 	data_x_min_for_display_ -= change_x;
 	data_x_max_for_display_ += change_x;
 
-	data_y_min_for_hist_display_ -= change_y;
+	// data_y_min_for_hist_display_ -= change_y;
 	data_y_max_for_hist_display_ += change_y;
 
 	updaterange();

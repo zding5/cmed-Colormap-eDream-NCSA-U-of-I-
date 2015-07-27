@@ -129,6 +129,25 @@ Function {make_window()} {open
           xywh {0 0 36 21}
         }
       }
+      Submenu {} {
+        label {&Modes} open
+        xywh {0 0 70 21}
+      } {
+        MenuItem {} {
+          label {Drawing Mode}
+          user_data 1 user_data_type long
+          callback change_mode
+          xywh {0 0 36 21}
+          code0 {o->shortcut(FL_SHIFT + FL_ALT + 'd');}
+        }
+        MenuItem {} {
+          label {&Scaling Mode}
+          user_data 2 user_data_type long
+          callback change_mode selected
+          xywh {0 0 36 21}
+          code0 {o->shortcut(FL_SHIFT + FL_ALT + 's');}
+        }
+      }
     }
   }
 } 
@@ -140,7 +159,7 @@ Function {make_zoom_panel()} {open
 } {
   Fl_Window zoom_panel_window {
     label {Zoom Panel Window} open
-    xywh {857 310 670 490} type Double visible
+    xywh {857 310 670 490} type Double hide
   } {
     Fl_Group {} {open
       xywh {0 6 417 148} box UP_BOX color 92
@@ -240,7 +259,7 @@ Max:}
         code0 {o->value(o->maximum());}
       }
       Fl_Slider y_display_range_max_slider {
-        callback y_display_range_max_slider_cb selected
+        callback y_display_range_max_slider_cb
         xywh {590 120 20 98} type {Vert Knob}
       }
     }

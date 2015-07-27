@@ -400,6 +400,12 @@ void zoom_panel_cb(Fl_Menu_*, void*) {
 //******END Zoom Panel Stuffs============//
 
 
+void change_mode(Fl_Menu_*, long mode) {
+  cmedit->set_editing_mode(int(mode));
+  // cmedit->redraw();
+}
+
+
 //END TESTING AREA ============================================================
 
 

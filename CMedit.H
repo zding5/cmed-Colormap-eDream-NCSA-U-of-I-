@@ -95,6 +95,10 @@ public:
 	void set_data_y_max_for_cmap_display(float val);
 
 	float hist_y_scaler( float dty );
+
+
+	void set_editing_mode( int mode );
+
     // **** Getters and Setters END
 
 
@@ -199,6 +203,8 @@ protected:
 	// The above two are integers.
 
 	int snapcment_;
+	float snap[4][CMENTMAX];
+	
 	float hist_data_x_min_; ///< The minimum value for real data range which is also the range for whole histogram.
 	float hist_data_x_max_; ///< The maximum value for real data range which is also the range for whole histogram
 	float hist_data_y_min_; ///< The minimum height of histogram
@@ -258,6 +264,8 @@ protected:
 	// **** Other Stuffs for now
 
 	float *hist_ent_arr;
+
+
 
 //	float postscale_, postexpon_;
 

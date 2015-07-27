@@ -25,6 +25,10 @@ Fl_Menu_Item menu_[] = {
  {"&Zoom", 0,  0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
  {"Zoom Panel", 0,  (Fl_Callback*)zoom_panel_cb, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {0,0,0,0,0,0,0,0,0},
+ {"&Modes", 0,  0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Drawing Mode", 0,  (Fl_Callback*)change_mode, (void*)(1), 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"&Scaling Mode", 0,  (Fl_Callback*)change_mode, (void*)(2), 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {0,0,0,0,0,0,0,0,0},
  {0,0,0,0,0,0,0,0,0}
 };
 
@@ -149,6 +153,12 @@ Fl_Double_Window* make_window() {
     } // Fl_Output* cshow.scaleout
     { Fl_Menu_Bar* o = new Fl_Menu_Bar(0, 0, 400, 20);
       o->color((Fl_Color)46);
+      { Fl_Menu_Item* o = &menu_[12];
+        o->shortcut(FL_SHIFT + FL_ALT + 'd');
+      }
+      { Fl_Menu_Item* o = &menu_[13];
+        o->shortcut(FL_SHIFT + FL_ALT + 's');
+      }
       o->menu(menu_);
     } // Fl_Menu_Bar* o
     o->end();

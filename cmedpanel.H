@@ -28,6 +28,7 @@ extern void menu_fload_cb(Fl_Menu_*, void*);
 extern void menu_histfload_cb(Fl_Menu_*, void*);
 extern void menu_undo_cb(Fl_Menu_*, void*);
 extern void zoom_panel_cb(Fl_Menu_*, void*);
+extern void change_mode(Fl_Menu_*, long);
 Fl_Double_Window* make_window();
 extern Fl_Menu_Item menu_[];
 #define menu_file (menu_+0)

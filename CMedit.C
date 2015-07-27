@@ -263,7 +263,24 @@ void CMedit::set_data_y_max_for_cmap_display(float val) {
 	data_y_max_for_cmap_display_ = val;
 }
 
+
+
+void CMedit::set_editing_mode( int mode ) {
+	editing_mode = mode;
+}
+
+
 // **** Getters and Setters END
+
+static float sample( float *a, int ents, float at, int smooth ) {
+	if(at <= 0 || ents <= 1) return a[0];
+	if(at >= 1) return a[ents-1];
+	float eat = at * ents;
+	int iat = (int)eat;
+	return smooth ? a[iat]*(1 - (eat-iat)) + a[iat+1]*(eat-iat)
+	: a[iat];
+}
+// WHAT ???
 
 
 // **** I/O Stuffs
@@ -419,7 +436,7 @@ int CMedit::cmap_fsave( FILE *outf ) {
 		// if(fprintf(outf, "%f %f %f %f\n", r, g, b, Aout( alpha[i] )) <= 0)
 		if(fprintf(outf, "%f %f %f %f\n", r, g, b, alpha[i] ) <= 0)
 
-		ok = 0;		
+		ok = 0;
 	}
 	if(ncomments > 0) {
 		fputs("\n", outf);
@@ -1023,15 +1040,6 @@ float CMedit::y2hue( float y ) {
 	return y / huezoom + hueshift;
 }
 
-static float sample( float *a, int ents, float at, int smooth ) {
-	if(at <= 0 || ents <= 1) return a[0];
-	if(at >= 1) return a[ents-1];
-	float eat = at * ents;
-	int iat = (int)eat;
-	return smooth ? a[iat]*(1 - (eat-iat)) + a[iat+1]*(eat-iat)
-	: a[iat];
-}
-// WHAT ???
 
 
 void CMedit::getrgba( int index, float rgba[4] ) const {
@@ -1088,13 +1096,13 @@ void colorpatch::draw() {
 }
 
 void CMedit::snapshot() {
-	// for(int k = 0; k < CMENTMAX; k++) {
-	// 	snap[0][k] = vh[k];
-	// 	snap[1][k] = vs[k];
-	// 	snap[2][k] = vb[k];
-	// 	snap[3][k] = alpha[k];
-	// }
-	// snapcment_ = cment_;	
+	for(int k = 0; k < CMENTMAX; k++) {
+		snap[0][k] = vh[k];
+		snap[1][k] = vs[k];
+		snap[2][k] = vb[k];
+		snap[3][k] = alpha[k];
+	}
+	snapcment_ = cment_;	
 }
 
 int CMedit::undo() {		/* actually undo/redo */
@@ -1131,7 +1139,7 @@ void CMedit::init() {
 	data_y_min_for_cmap_display_ = 0.0;
 	data_y_max_for_cmap_display_ = 1.0;
 
-	editing_mode = 2;
+	editing_mode = 1;
 	hist_ent_arr = NULL;
 
 	cment_ = snapcment_ = 256;

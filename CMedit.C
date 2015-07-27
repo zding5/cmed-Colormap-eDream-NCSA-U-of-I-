@@ -125,6 +125,15 @@ int CMedit::dtx2cmapx( float dtx ) {
   }
 }
 
+static float sample( float *a, int ents, float at, int smooth ) {
+	if(at <= 0 || ents <= 1) return a[0];
+	if(at >= 1) return a[ents-1];
+	float eat = at * ents;
+	int iat = (int)eat;
+	return smooth ? a[iat]*(1 - (eat-iat)) + a[iat+1]*(eat-iat)
+	: a[iat];
+}
+
 
 //Histogram y scaler. Will have more options later on I think
 float CMedit::hist_y_scaler( float dty ) {
@@ -141,7 +150,7 @@ CMedit::CMedit(int x, int y, int w, int h, const char *label)
 
 // **** Getters and Setters
 int CMedit::cment() const {
-	return cment_;
+	return cment_;    
 }
 
 void CMedit::cment( int newcment ) { // Change cmap entry number
@@ -155,13 +164,13 @@ void CMedit::cment( int newcment ) { // Change cmap entry number
 	snapshot();
 
 	int smooth = 0; // (cment_ < newcment);
-	// for(int o = 0; o < newcment; o++) {
-	// 	float at = newcment > 1 ? (float)o / (newcment-1) : 0;
-	// 	vh[o] = sample( &snap[0][0], cment_, at, smooth );
-	// 	vs[o] = sample( &snap[1][0], cment_, at, smooth );
-	// 	vb[o] = sample( &snap[2][0], cment_, at, smooth );
-	// 	alpha[o] = sample( &snap[3][0], cment_, at, smooth );
-	// }
+	for(int o = 0; o < newcment; o++) {
+		float at = newcment > 1 ? (float)o / (newcment-1) : 0;
+		vh[o] = sample( &snap[0][0], cment_, at, smooth );
+		vs[o] = sample( &snap[1][0], cment_, at, smooth );
+		vb[o] = sample( &snap[2][0], cment_, at, smooth );
+		alpha[o] = sample( &snap[3][0], cment_, at, smooth );
+	}
 	cment_ = newcment;
 	remin = 0;
 	remax = cment_ - 1;
@@ -272,14 +281,7 @@ void CMedit::set_editing_mode( int mode ) {
 
 // **** Getters and Setters END
 
-static float sample( float *a, int ents, float at, int smooth ) {
-	if(at <= 0 || ents <= 1) return a[0];
-	if(at >= 1) return a[ents-1];
-	float eat = at * ents;
-	int iat = (int)eat;
-	return smooth ? a[iat]*(1 - (eat-iat)) + a[iat+1]*(eat-iat)
-	: a[iat];
-}
+
 // WHAT ???
 
 

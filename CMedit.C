@@ -305,10 +305,8 @@ int CMedit::cmap_fload( FILE *inf ) {
 
 	int f;
 
-	printf("%s\n", "here");
 	while(getline(&line, &line_size, inf) != -1) {
-		printf("%s\n", "loop");
-		printf("%s\n", line);
+
 		line_number++;
 		for(buf1 = line; *buf1 && isspace(*buf1); buf1++){
 			//skip potential spaces
@@ -454,7 +452,7 @@ int CMedit::hist_fload( FILE *inf ) {
 	size_t line_size;
 	char *flag_pointer = NULL;
 	int entry_counter = 0;
-	int maxmax;
+	float datamax = -1;
 
 	getline(&line, &line_size, inf);
 
@@ -475,14 +473,15 @@ int CMedit::hist_fload( FILE *inf ) {
     	getline(&line, &line_size, inf);
 		strtok(line, " ");
 		hist_ent_arr[i] = atof(strtok(NULL, " "));
-		printf("%f", hist_ent_arr[i]);
-		maxmax = (hist_ent_arr[i]>maxmax)?hist_ent_arr[i]:maxmax;
+		//printf("%f", hist_ent_arr[i]);
+		datamax = (hist_ent_arr[i]>datamax)?hist_ent_arr[i]:datamax;
 	}
 
-	hist_data_y_max_ = maxmax;
+	hist_data_y_max_ = datamax*1.1;
 	data_y_max_for_cmap_ = hist_data_y_max_;
 	data_y_max_for_hist_display_ = hist_data_y_max_;
-	
+	printf("datamax: %d\n", datamax);
+
 	updaterange();
 	redraw();
 }
@@ -532,7 +531,7 @@ void CMedit::draw() {
 		glEnable( GL_SCISSOR_TEST );
 		glBegin(GL_QUADS);
 		for (i = 0; i<=hisent_; i++) {
-			printf("%d, %f, %f\n",i, histx2dtx(i), dtx2drx(i) );
+			//printf("%d, %f, %f\n",i, histx2dtx(i), dtx2drx(i) );
 
 // 
 			glColor3f( 0,0,0 );

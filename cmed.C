@@ -405,6 +405,10 @@ void change_mode(Fl_Menu_*, long mode) {
   // cmedit->redraw();
 }
 
+void display_reset_cb(Fl_Button*, void*) {
+  cmedit->display_reset();
+  cmedit->redraw();
+}
 
 //END TESTING AREA ============================================================
 

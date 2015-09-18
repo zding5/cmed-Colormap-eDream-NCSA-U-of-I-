@@ -99,6 +99,8 @@ public:
 
 	void set_editing_mode( int mode );
 
+	void display_reset();
+
     // **** Getters and Setters END
 
 
@@ -221,14 +223,15 @@ protected:
 	float data_y_min_for_hist_display_; ///< 
 	float data_y_max_for_hist_display_;
 	float data_y_min_for_cmap_display_;
-	float data_y_max_for_cmap_display_;
+	float data_y_max_for_cmap_display_; 
+
+
+	float data_x_min_for_display_ori_;
+	float data_x_max_for_display_ori_;
+	float data_y_min_for_hist_display_ori_;
+	float data_y_max_for_hist_display_ori_;
 
 	// **** Coordinates Parameters END
-
-
-	// **** Coordinates Parameters END
-
-	// **** Coordinates Transformations
 
 
 	// **** Coordinates Transformations

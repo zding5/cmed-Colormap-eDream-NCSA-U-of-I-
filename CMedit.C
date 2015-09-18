@@ -279,6 +279,13 @@ void CMedit::set_editing_mode( int mode ) {
 }
 
 
+void CMedit::display_reset() {
+	data_x_min_for_display_ = data_x_min_for_display_ori_;
+	data_x_max_for_display_ = data_x_max_for_display_ori_;
+	data_y_max_for_hist_display_ = data_y_max_for_hist_display_ori_;
+	data_y_min_for_hist_display_ = data_y_min_for_hist_display_ori_;
+}
+
 // **** Getters and Setters END
 
 
@@ -462,6 +469,7 @@ int CMedit::hist_fload( FILE *inf ) {
 
 	data_x_max_for_cmap_ = hist_data_x_max_;
 	data_x_max_for_display_ = hist_data_x_max_;
+	data_x_max_for_display_ori_ = data_x_max_for_display_;
 
 	getline(&line, &line_size, inf);
 	hisent_ = atoi(line);
@@ -480,6 +488,7 @@ int CMedit::hist_fload( FILE *inf ) {
 	hist_data_y_max_ = datamax*1.1;
 	data_y_max_for_cmap_ = hist_data_y_max_;
 	data_y_max_for_hist_display_ = hist_data_y_max_;
+	data_y_max_for_hist_display_ori_ = data_y_max_for_hist_display_;
 	printf("datamax: %d\n", datamax);
 
 	updaterange();
@@ -1139,6 +1148,14 @@ void CMedit::init() {
 	data_y_max_for_hist_display_ = 1.0;
 	data_y_min_for_cmap_display_ = 0.0;
 	data_y_max_for_cmap_display_ = 1.0;
+
+
+	data_x_min_for_display_ori_ = data_x_min_for_display_;
+	data_x_max_for_display_ori_ = data_x_max_for_display_;
+	data_y_max_for_hist_display_ori_ = data_y_max_for_hist_display_;
+	data_y_min_for_hist_display_ori_ = data_y_min_for_hist_display_;
+
+
 
 	editing_mode = 1;
 	hist_ent_arr = NULL;

@@ -161,6 +161,9 @@ Fl_Double_Window* make_window() {
       }
       o->menu(menu_);
     } // Fl_Menu_Bar* o
+    { Fl_Button* o = new Fl_Button(55, 25, 70, 25, "Reset");
+      o->callback((Fl_Callback*)display_reset_cb);
+    } // Fl_Button* o
     o->end();
   } // Fl_Double_Window* o
   return w;

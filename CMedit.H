@@ -19,6 +19,8 @@
 #include <memory.h>
 
 #include <ctype.h>
+#include <stack>
+#include <deque>
 
 // ***** Constants Definitions
 
@@ -34,6 +36,10 @@ enum CMfield {
     HUE, SAT, BRIGHT,
     ALPHA,
     RED, GREEN, BLUE
+};
+
+struct colorEnt {
+	float ent[4][CMENTMAX];
 };
 
 // ***** Constants Definitions END
@@ -193,6 +199,8 @@ protected:
 
 	float hueshift, huezoom;
 
+	float hueshiffile;///usr/share/doc/HTML/index.htmlt, huezoom;
+
 	char **comments;
 	int ncomments, maxcomments;
 
@@ -233,7 +241,13 @@ protected:
 
 	// **** Coordinates Parameters END
 
+	// float undo_stack[20][4][CMENTMAX];
+	// float redo_stack[20][4][CMENTMAX];
 
+	std::deque<colorEnt> undo_stack;
+	std::deque<colorEnt> redo_stack;
+	int undo_stack_count;
+	int redo_stack_count;
 	// **** Coordinates Transformations
 
 	//windows to drawing

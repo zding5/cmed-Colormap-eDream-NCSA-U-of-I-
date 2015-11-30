@@ -809,15 +809,15 @@ int CMedit::handle_drawing(int ev) {
 			dragfield = btn2field[ hsbmode ][ btn-1 ];
 		}
 
-		// if(Fl::event_key('l')) {
-		// /*...*/
-		// }
-		// else if(Fl::event_key('r')) {
-		// /*...*/
-		// }
-		// else {
-		// 	snapshot();
-		// }
+		if(Fl::event_key('l')) {
+		/*...*/
+		}
+		else if(Fl::event_key('r')) {
+		/*...*/
+		}
+		else {
+			snapshot();
+		}
 		// What is going on here ???
 		return 1;
 
@@ -1106,34 +1106,97 @@ void colorpatch::draw() {
 }
 
 void CMedit::snapshot() {
+	printf("%s\n", "SHOT");
+	colorEnt snapper;
+
 	for(int k = 0; k < CMENTMAX; k++) {
-		snap[0][k] = vh[k];
-		snap[1][k] = vs[k];
-		snap[2][k] = vb[k];
-		snap[3][k] = alpha[k];
+		snapper.ent[0][k] = vh[k];
+		snapper.ent[1][k] = vs[k];
+		snapper.ent[2][k] = vb[k];
+		snapper.ent[3][k] = alpha[k];
 	}
-	snapcment_ = cment_;	
+	snapcment_ = cment_;
+
+	if(undo_stack_count>=10){
+		// maybe use a deque...?
+		undo_stack.pop_front();
+		undo_stack.push_back(snapper);
+		return;
+	}
+	else{
+		undo_stack.push_back(snapper);
+		undo_stack_count++;
+	}
 }
 
-int CMedit::undo() {		/* actually undo/redo */
-	// float t;
-	// for(int k = 0; k < CMENTMAX; k++) {
-	// 	t = vh[k];       vh[k] = snap[0][k];  snap[0][k] = t;
-	// 	t = vs[k];       vs[k] = snap[1][k];  snap[1][k] = t;
-	// 	t = vb[k];       vb[k] = snap[2][k];  snap[2][k] = t;
-	// 	t = alpha[k]; alpha[k] = snap[3][k];  snap[3][k] = t;
-	// }
+int CMedit::undo() {
+	float t;
+	// float** snap = (float**)(4*CMENTMAX);
+	// printf("%d\n", undo_stack.size());
+	if (undo_stack.empty()) return 0;
+	// printf("%s\n", "GOT HERE?");
+	colorEnt snapper;
+	snapper = undo_stack.back();
+	for(int k = 0; k < CMENTMAX; k++) {
+		t = vh[k];       vh[k] = snapper.ent[0][k];  snapper.ent[0][k] = t;
+		t = vs[k];       vs[k] = snapper.ent[1][k];  snapper.ent[1][k] = t;
+		t = vb[k];       vb[k] = snapper.ent[2][k];  snapper.ent[2][k] = t;
+		t = alpha[k]; alpha[k] = snapper.ent[3][k];  snapper.ent[3][k] = t;
+	}
 	// int i = cment_; cment_ = snapcment_; snapcment_ = i;
-	// redraw();
-	// return 1;
+	redraw();
+	if(redo_stack_count>=10){
+		redo_stack.pop_back();
+		redo_stack.push_front(undo_stack.back());
+	}
+	else{
+		redo_stack.push_front(undo_stack.back());
+	}
+	undo_stack.pop_back();
+	undo_stack_count--;
+	
+	// printf("%d\n", undo_stack.size());
+	return 1;
 }
+
+// int CMedit::redo() {
+// 	float t;
+// 	if (redo_stack.empty()) return 0;
+// 	printf("%s\n", "GOT HERE?");
+// 	colorEnt snapper;
+// 	snapper = redo_stack.front();
+// 	for(int k = 0; k < CMENTMAX; k++) {
+// 		t = vh[k];       vh[k] = snapper.ent[0][k];  snapper.ent[0][k] = t;
+// 		t = vs[k];       vs[k] = snapper.ent[1][k];  snapper.ent[1][k] = t;
+// 		t = vb[k];       vb[k] = snapper.ent[2][k];  snapper.ent[2][k] = t;
+// 		t = alpha[k]; alpha[k] = snapper.ent[3][k];  snapper.ent[3][k] = t;
+// 	}
+// 	// int i = cment_; cment_ = snapcment_; snapcment_ = i;
+// 	redraw();
+// 	if(stack_count>=10){
+// 		// maybe use a deque...?
+// 		undo_stack.pop_front();
+// 		undo_stack.push_back(snapper);
+// 		return;
+// 	}
+// 	else{
+// 		undo_stack.push_back(snapper);
+// 		stack_count++;
+// 	}
+
+// 	undo_stack.push_front(undo_stack.back());
+// 	undo_stack.pop_back();
+// 	stack_count--;
+// 	printf("%d\n", undo_stack.size());
+// 	return 1;
+// }
 
 void CMedit::init() {
 
 	hist_data_x_min_ = 0.0;
 	hist_data_x_max_ = 1.0;
 	hist_data_y_min_ = 0.0;
-	hist_data_y_max_ = 1.0;
+	hist_data_y_max_ = 1.0; 
 
 	data_x_min_for_cmap_ = 0.0;
 	data_x_max_for_cmap_ = 1.0;
@@ -1173,6 +1236,9 @@ void CMedit::init() {
 	hueshift = 0;
 	huezoom = 1;
 	// draghue = 0;
+
+	undo_stack_count = 0;
+	redo_stack_count = 0;
 
 	ncomments = 0;
 	maxcomments = 8;

@@ -162,8 +162,7 @@ void CMedit::cment( int newcment ) { // Change cmap entry number
 	}
 	if(cment_ == newcment) return;
 	/* Resample */
-	int temp_cment = cment_;
-	cment_ = newcment;
+	// int temp_cment = cment_;
 	snapshot();
 
 	int smooth = 0; // (cment_ < newcment);
@@ -177,13 +176,14 @@ void CMedit::cment( int newcment ) { // Change cmap entry number
 	colorEnt last_snap = undo_stack.back();
 	for(int o = 0; o < newcment; o++) {
 		float at = newcment > 1 ? (float)o / (newcment-1) : 0;
-		vh[o] = sample( last_snap.ent[0], temp_cment, at, smooth );
-		vs[o] = sample( last_snap.ent[1], temp_cment, at, smooth );
-		vb[o] = sample( last_snap.ent[2], temp_cment, at, smooth );
-		alpha[o] = sample( last_snap.ent[3], temp_cment, at, smooth );
+		vh[o] = sample( last_snap.ent[0], cment_, at, smooth );
+		vs[o] = sample( last_snap.ent[1], cment_, at, smooth );
+		vb[o] = sample( last_snap.ent[2], cment_, at, smooth );
+		alpha[o] = sample( last_snap.ent[3], cment_, at, smooth );
 	}
 
 
+	cment_ = newcment;
 	remin = 0;
 	remax = cment_ - 1;
 	lockmin = 0;
@@ -1159,6 +1159,7 @@ int CMedit::undo() {
 	// int i = cment_; cment_ = snapcment_; snapcment_ = i;
 	cment_ = snapper.this_cment;
 	redraw();
+	cment(snapper.this_cment);
 	if(redo_stack_count>=10){
 		redo_stack.pop_back();
 		redo_stack.push_front(snapper);
@@ -1189,6 +1190,7 @@ int CMedit::redo() {
 // 	// int i = cment_; cment_ = snapcment_; snapcment_ = i;
 	snapper.this_cment = cment_;
 	redraw();
+	cment(snapper.this_cment);
 	if(undo_stack_count>=10){
 // 		// maybe use a deque...?
 		undo_stack.pop_front();

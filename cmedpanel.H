@@ -12,21 +12,18 @@ extern void lerp_cb(Fl_Slider*, void*);
 extern Fl_Slider *forceslider;
 extern void rgbmode_cb(Fl_Button*, void*);
 extern Fl_Button *rgbmode;
-#include <FL/Fl_Input.H>
-extern void input_cb(Fl_Input*, void*);
-extern Fl_Input *fnamebox;
 #include <FL/Fl_Box.H>
 extern class CMedit *cmedit;
 #include <FL/Fl_Value_Input.H>
 extern void report_cb(Fl_Value_Input*, void*);
 #include <FL/Fl_Output.H>
-extern void ascale_cb(Fl_Value_Input*, void*);
 extern void ncment_cb(Fl_Value_Input*, void*);
 #include <FL/Fl_Menu_Bar.H>
 extern void menu_fsave_cb(Fl_Menu_*, void*);
 extern void menu_fload_cb(Fl_Menu_*, void*);
 extern void menu_histfload_cb(Fl_Menu_*, void*);
 extern void menu_undo_cb(Fl_Menu_*, void*);
+extern void menu_redo_cb(Fl_Menu_*, void*);
 extern void zoom_panel_cb(Fl_Menu_*, void*);
 extern void change_mode(Fl_Menu_*, long);
 extern void display_reset_cb(Fl_Button*, void*);
@@ -36,7 +33,8 @@ extern Fl_Menu_Item menu_[];
 #define save_color_file (menu_+1)
 #define load_color_file (menu_+2)
 #define menu_undo (menu_+6)
-#define zoom_panel (menu_+9)
+#define menu_redo (menu_+7)
+#define zoom_panel (menu_+10)
 
 class UserInterface {
 };

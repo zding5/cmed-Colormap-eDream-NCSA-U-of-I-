@@ -126,6 +126,7 @@ int CMedit::dtx2cmapx( float dtx ) {
 }
 
 static float sample( float *a, int ents, float at, int smooth ) {
+// static float sample( colorEnt ce, int ents, float at, int smooth ) {
 	if(at <= 0 || ents <= 1) return a[0];
 	if(at >= 1) return a[ents-1];
 	float eat = at * ents;
@@ -160,18 +161,29 @@ void CMedit::cment( int newcment ) { // Change cmap entry number
 		newcment = CMENTMAX;
 	}
 	if(cment_ == newcment) return;
-	/* Resample */ 
+	/* Resample */
+	int temp_cment = cment_;
+	cment_ = newcment;
 	snapshot();
 
 	int smooth = 0; // (cment_ < newcment);
+	// for(int o = 0; o < newcment; o++) {
+	// 	float at = newcment > 1 ? (float)o / (newcment-1) : 0;
+	// 	vh[o] = sample( &snap[0][0], cment_, at, smooth );
+	// 	vs[o] = sample( &snap[1][0], cment_, at, smooth );
+	// 	vb[o] = sample( &snap[2][0], cment_, at, smooth );
+	// 	alpha[o] = sample( &snap[3][0], cment_, at, smooth );
+	// }
+	colorEnt last_snap = undo_stack.back();
 	for(int o = 0; o < newcment; o++) {
 		float at = newcment > 1 ? (float)o / (newcment-1) : 0;
-		vh[o] = sample( &snap[0][0], cment_, at, smooth );
-		vs[o] = sample( &snap[1][0], cment_, at, smooth );
-		vb[o] = sample( &snap[2][0], cment_, at, smooth );
-		alpha[o] = sample( &snap[3][0], cment_, at, smooth );
+		vh[o] = sample( last_snap.ent[0], temp_cment, at, smooth );
+		vs[o] = sample( last_snap.ent[1], temp_cment, at, smooth );
+		vb[o] = sample( last_snap.ent[2], temp_cment, at, smooth );
+		alpha[o] = sample( last_snap.ent[3], temp_cment, at, smooth );
 	}
-	cment_ = newcment;
+
+
 	remin = 0;
 	remax = cment_ - 1;
 	lockmin = 0;
@@ -1115,7 +1127,8 @@ void CMedit::snapshot() {
 		snapper.ent[2][k] = vb[k];
 		snapper.ent[3][k] = alpha[k];
 	}
-	snapcment_ = cment_;
+	// snapcment_ = cment_;
+	snapper.this_cment = cment_;
 
 	if(undo_stack_count>=10){
 		// maybe use a deque...?
@@ -1144,13 +1157,15 @@ int CMedit::undo() {
 		t = alpha[k]; alpha[k] = snapper.ent[3][k];  snapper.ent[3][k] = t;
 	}
 	// int i = cment_; cment_ = snapcment_; snapcment_ = i;
+	cment_ = snapper.this_cment;
 	redraw();
 	if(redo_stack_count>=10){
 		redo_stack.pop_back();
-		redo_stack.push_front(undo_stack.back());
+		redo_stack.push_front(snapper);
 	}
 	else{
-		redo_stack.push_front(undo_stack.back());
+		redo_stack.push_front(snapper);
+		redo_stack_count++;
 	}
 	undo_stack.pop_back();
 	undo_stack_count--;
@@ -1159,37 +1174,38 @@ int CMedit::undo() {
 	return 1;
 }
 
-// int CMedit::redo() {
-// 	float t;
-// 	if (redo_stack.empty()) return 0;
+int CMedit::redo() {
+	float t;
+	if (redo_stack.empty()) return 0;
 // 	printf("%s\n", "GOT HERE?");
-// 	colorEnt snapper;
-// 	snapper = redo_stack.front();
-// 	for(int k = 0; k < CMENTMAX; k++) {
-// 		t = vh[k];       vh[k] = snapper.ent[0][k];  snapper.ent[0][k] = t;
-// 		t = vs[k];       vs[k] = snapper.ent[1][k];  snapper.ent[1][k] = t;
-// 		t = vb[k];       vb[k] = snapper.ent[2][k];  snapper.ent[2][k] = t;
-// 		t = alpha[k]; alpha[k] = snapper.ent[3][k];  snapper.ent[3][k] = t;
-// 	}
+	colorEnt snapper;
+	snapper = redo_stack.front();
+	for(int k = 0; k < CMENTMAX; k++) {
+		t = vh[k];       vh[k] = snapper.ent[0][k];  snapper.ent[0][k] = t;
+		t = vs[k];       vs[k] = snapper.ent[1][k];  snapper.ent[1][k] = t;
+		t = vb[k];       vb[k] = snapper.ent[2][k];  snapper.ent[2][k] = t;
+		t = alpha[k]; alpha[k] = snapper.ent[3][k];  snapper.ent[3][k] = t;
+	}
 // 	// int i = cment_; cment_ = snapcment_; snapcment_ = i;
-// 	redraw();
-// 	if(stack_count>=10){
+	snapper.this_cment = cment_;
+	redraw();
+	if(undo_stack_count>=10){
 // 		// maybe use a deque...?
-// 		undo_stack.pop_front();
-// 		undo_stack.push_back(snapper);
+		undo_stack.pop_front();
+		undo_stack.push_back(snapper);
 // 		return;
-// 	}
-// 	else{
-// 		undo_stack.push_back(snapper);
-// 		stack_count++;
-// 	}
+	}
+	else{
+		undo_stack.push_back(snapper);
+		undo_stack_count++;
+	}
 
-// 	undo_stack.push_front(undo_stack.back());
-// 	undo_stack.pop_back();
-// 	stack_count--;
+	redo_stack.pop_front();
+	// undo_stack.pop_back();
+	redo_stack_count--;
 // 	printf("%d\n", undo_stack.size());
-// 	return 1;
-// }
+	return 1;
+}
 
 void CMedit::init() {
 

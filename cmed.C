@@ -492,6 +492,10 @@ void menu_undo_cb( Fl_Menu_ *, void * ) {
   cmedit->undo();
 }
 
+void menu_redo_cb( Fl_Menu_ *, void * ) {
+  cmedit->redo();
+}
+
 void report_cb( Fl_Value_Input *cindex, void * ) {
   cmedit->report( (int) cindex->value() );
 }
@@ -595,8 +599,8 @@ int main(int argc, char *argv[]) {
   cmedit->range_update_to( R_updater );
   cmedit->updaterange();
 
-  cshow.postscalein->value(1);
-  cshow.postexponin->value(1);
+  // cshow.postscalein->value(1);
+  // cshow.postexponin->value(1);
 
   if(argc>2 && !strcmp(argv[1], "-e")) {
     cmedit->cment( atoi(argv[2]) );

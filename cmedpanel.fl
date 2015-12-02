@@ -7,7 +7,7 @@ decl {\#include "cmed.H"} {private local
 
 Function {make_window()} {open
 } {
-  Fl_Window {} {open selected
+  Fl_Window {} {open
     xywh {655 251 400 610} type Double resizable visible
   } {
     Fl_Button undobutton {
@@ -98,6 +98,11 @@ Function {make_window()} {open
           label Undo
           callback menu_undo_cb
           xywh {0 0 36 21} shortcut 0x4007a
+        }
+        MenuItem menu_redo {
+          label Redo
+          callback menu_redo_cb selected
+          xywh {0 0 36 21} shortcut 0x40079
         }
       }
       Submenu {} {

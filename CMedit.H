@@ -39,6 +39,7 @@ enum CMfield {
 };
 
 struct colorEnt {
+	int this_cment;
 	float ent[4][CMENTMAX];
 };
 

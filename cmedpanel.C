@@ -9,8 +9,6 @@ Fl_Slider *forceslider=(Fl_Slider *)0;
 
 Fl_Button *rgbmode=(Fl_Button *)0;
 
-Fl_Input *fnamebox=(Fl_Input *)0;
-
 class CMedit *cmedit=(class CMedit *)0;
 
 Fl_Menu_Item menu_[] = {
@@ -21,6 +19,7 @@ Fl_Menu_Item menu_[] = {
  {0,0,0,0,0,0,0,0,0},
  {"&Edit", 0,  0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
  {"Undo", 0x4007a,  (Fl_Callback*)menu_undo_cb, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Redo", 0x40079,  (Fl_Callback*)menu_redo_cb, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
  {0,0,0,0,0,0,0,0,0},
  {"&Zoom", 0,  0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
  {"Zoom Panel", 0,  (Fl_Callback*)zoom_panel_cb, 0, 0, FL_NORMAL_LABEL, 0, 14, 0},
@@ -34,7 +33,7 @@ Fl_Menu_Item menu_[] = {
 
 Fl_Double_Window* make_window() {
   Fl_Double_Window* w;
-  { Fl_Double_Window* o = new Fl_Double_Window(400, 605);
+  { Fl_Double_Window* o = new Fl_Double_Window(400, 610);
     w = o;
     { undobutton = new Fl_Button(6, 25, 40, 25, "Undo");
       undobutton->down_box(FL_DOWN_BOX);
@@ -53,34 +52,28 @@ Fl_Double_Window* make_window() {
       rgbmode->callback((Fl_Callback*)rgbmode_cb);
       rgbmode->align(Fl_Align(FL_ALIGN_CENTER|FL_ALIGN_INSIDE));
     } // Fl_Button* rgbmode
-    { fnamebox = new Fl_Input(31, 60, 355, 25, "File:");
-      fnamebox->labeltype(FL_ENGRAVED_LABEL);
-      fnamebox->labelsize(12);
-      fnamebox->callback((Fl_Callback*)input_cb);
-      fnamebox->when(FL_WHEN_ENTER_KEY_ALWAYS);
-    } // Fl_Input* fnamebox
-    { cshow.hsblbls[0] = new Fl_Box(30, 219, 80, 20, "Hue (L)");
+    { cshow.hsblbls[0] = new Fl_Box(40, 219, 80, 20, "Hue (L)");
       cshow.hsblbls[0]->box(FL_FLAT_BOX);
       cshow.hsblbls[0]->color((Fl_Color)34);
       cshow.hsblbls[0]->labelfont(1);
       cshow.hsblbls[0]->labelsize(12);
       cshow.hsblbls[0]->labelcolor((Fl_Color)3);
     } // Fl_Box* cshow.hsblbls[0]
-    { cshow.hsblbls[1] = new Fl_Box(115, 219, 75, 20, "Sat(M)");
+    { cshow.hsblbls[1] = new Fl_Box(125, 219, 75, 20, "Sat(M)");
       cshow.hsblbls[1]->box(FL_FLAT_BOX);
       cshow.hsblbls[1]->color((Fl_Color)34);
       cshow.hsblbls[1]->labelfont(1);
       cshow.hsblbls[1]->labelsize(12);
       cshow.hsblbls[1]->labelcolor((Fl_Color)2);
     } // Fl_Box* cshow.hsblbls[1]
-    { cshow.hsblbls[2] = new Fl_Box(195, 219, 75, 20, "Bright(R)");
+    { cshow.hsblbls[2] = new Fl_Box(205, 219, 75, 20, "Bright(R)");
       cshow.hsblbls[2]->box(FL_FLAT_BOX);
       cshow.hsblbls[2]->color((Fl_Color)34);
       cshow.hsblbls[2]->labelfont(1);
       cshow.hsblbls[2]->labelsize(12);
       cshow.hsblbls[2]->labelcolor((Fl_Color)235);
     } // Fl_Box* cshow.hsblbls[2]
-    { Fl_Box* o = new Fl_Box(275, 219, 80, 20, "Alpha(shift)");
+    { Fl_Box* o = new Fl_Box(285, 219, 80, 20, "Alpha(shift)");
       o->box(FL_FLAT_BOX);
       o->color((Fl_Color)34);
       o->labelfont(1);
@@ -99,7 +92,7 @@ Fl_Double_Window* make_window() {
       cmedit->when(FL_WHEN_RELEASE);
       Fl_Group::current()->resizable(cmedit);
     } // class CMedit* cmedit
-    { cshow.color = new colorpatch(62, 515, 50, 40);
+    { cshow.color = new colorpatch(72, 515, 50, 40);
       cshow.color->box(FL_DOWN_BOX);
       cshow.color->color(FL_BACKGROUND_COLOR);
       cshow.color->selection_color(FL_BACKGROUND_COLOR);
@@ -110,7 +103,7 @@ Fl_Double_Window* make_window() {
       cshow.color->align(Fl_Align(FL_ALIGN_CENTER));
       cshow.color->when(FL_WHEN_RELEASE);
     } // colorpatch* cshow.color
-    { cshow.cindex = new Fl_Value_Input(7, 530, 50, 25, "  (index");
+    { cshow.cindex = new Fl_Value_Input(17, 530, 50, 25, "  (index");
       cshow.cindex->box(FL_FLAT_BOX);
       cshow.cindex->color((Fl_Color)16);
       cshow.cindex->maximum(0);
@@ -119,44 +112,31 @@ Fl_Double_Window* make_window() {
       cshow.cindex->callback((Fl_Callback*)report_cb);
       cshow.cindex->align(Fl_Align(FL_ALIGN_TOP));
     } // Fl_Value_Input* cshow.cindex
-    { cshow.hsba = new Fl_Output(117, 530, 120, 25, "HSBA");
+    { cshow.hsba = new Fl_Output(127, 530, 120, 25, "HSBA");
       cshow.hsba->box(FL_FLAT_BOX);
       cshow.hsba->color((Fl_Color)16);
       cshow.hsba->textsize(11);
       cshow.hsba->align(Fl_Align(FL_ALIGN_TOP));
     } // Fl_Output* cshow.hsba
-    { cshow.rgba = new Fl_Output(247, 530, 125, 25, "rgb");
+    { cshow.rgba = new Fl_Output(257, 530, 125, 25, "rgb");
       cshow.rgba->box(FL_FLAT_BOX);
       cshow.rgba->color((Fl_Color)16);
       cshow.rgba->textsize(11);
       cshow.rgba->align(Fl_Align(FL_ALIGN_TOP));
     } // Fl_Output* cshow.rgba
-    { cshow.postscalein = new Fl_Value_Input(317, 570, 65, 25, "* Amax");
-      cshow.postscalein->callback((Fl_Callback*)ascale_cb);
-      cshow.postscalein->align(Fl_Align(FL_ALIGN_TOP_LEFT));
-    } // Fl_Value_Input* cshow.postscalein
-    { cshow.postexponin = new Fl_Value_Input(237, 570, 75, 25, "**  expon  )");
-      cshow.postexponin->callback((Fl_Callback*)ascale_cb);
-      cshow.postexponin->align(Fl_Align(FL_ALIGN_TOP_LEFT));
-    } // Fl_Value_Input* cshow.postexponin
-    { cshow.cmentin = new Fl_Value_Input(7, 570, 55, 25, "cmapsize");
+    { cshow.cmentin = new Fl_Value_Input(17, 570, 55, 25, "cmapsize");
       cshow.cmentin->box(FL_ENGRAVED_BOX);
       cshow.cmentin->color((Fl_Color)25);
       cshow.cmentin->callback((Fl_Callback*)ncment_cb);
       cshow.cmentin->align(Fl_Align(FL_ALIGN_TOP_LEFT));
       cshow.cmentin->when(FL_WHEN_RELEASE);
     } // Fl_Value_Input* cshow.cmentin
-    { cshow.scaleout = new Fl_Output(137, 570, 95, 25, "  Aout  =  ( Ain");
-      cshow.scaleout->box(FL_FLAT_BOX);
-      cshow.scaleout->color((Fl_Color)16);
-      cshow.scaleout->align(Fl_Align(FL_ALIGN_TOP_LEFT));
-    } // Fl_Output* cshow.scaleout
     { Fl_Menu_Bar* o = new Fl_Menu_Bar(0, 0, 400, 20);
       o->color((Fl_Color)46);
-      { Fl_Menu_Item* o = &menu_[12];
+      { Fl_Menu_Item* o = &menu_[13];
         o->shortcut(FL_SHIFT + FL_ALT + 'd');
       }
-      { Fl_Menu_Item* o = &menu_[13];
+      { Fl_Menu_Item* o = &menu_[14];
         o->shortcut(FL_SHIFT + FL_ALT + 's');
       }
       o->menu(menu_);

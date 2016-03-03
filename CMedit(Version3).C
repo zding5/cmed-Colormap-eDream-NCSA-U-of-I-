@@ -71,10 +71,7 @@
 */
 // windows to drawing
 float CMedit::wx2drx( int wx ) {//pixel coordinate comes in as int
-	printf("%d %d\n", wx, w());
-	// return (DR_XMIN + wx * ( DR_XW ) / w())
-	// return (wx + (-1/16.f)*w());
-	return wx;
+  return (DR_XMIN + wx * ( DR_XW ) / w());
 }
 float CMedit::wy2dry( int wy ) {//pixel coordinate comes in as int
   return (DR_YMAX - wy * ( DR_YH ) / h());
@@ -83,8 +80,7 @@ float CMedit::wy2dry( int wy ) {//pixel coordinate comes in as int
 // data to drawing (Actually only converting the displaying part, between DISP_XMIN and DISP_XMAX, to drawing)
 float CMedit::dtx2drx( float dtx ) {
   // return (( dtx - DTHIST_XMIN ) * ( DR_XFROM0 ) / DTHIST_XW);
-	// return ( 0 + ( dtx - DISP_XMIN ) * ( DR_XFROM0 ) / DISP_XW );
-	return ( 0 + ( dtx - DISP_XMIN ) * w()*15/16 / DISP_XW );
+	return ( 0 + ( dtx - DISP_XMIN ) * ( DR_XFROM0 ) / DISP_XW );
 
 }// data to drawing (Actually only converting the displaying part, between HDISP_YMIN and HDISP_YMAX, to drawing)
 float CMedit::hdty2dry( float hdty ) {
@@ -97,8 +93,7 @@ float CMedit::cdty2dry( float cdty ) {
 
 // drawing to data ( Actually to data range for display, between DISP_XMIN and DISP_XMAX I think ... )
 float CMedit::drx2dtx( float drx ) {
-  // return ( DISP_XMIN + (drx) * ( DISP_XW ) / DR_XFROM0 );
-  return ( DISP_XMIN + (drx) * ( DISP_XW ) / (w()*15/16) ); 
+  return ( DISP_XMIN + (drx) * ( DISP_XW ) / DR_XFROM0 ); 
 }
 
 float CMedit::dry2hdty( float dry ) {
@@ -108,7 +103,6 @@ float CMedit::dry2hdty( float dry ) {
 // colormap to data ( Actually the cmap entries to data range which the cmap apply to )
 float CMedit::cmapx2dtx( int cmapx ) {
 	return ( CMAPAPP_XMIN + (cmapx) * ( CMAPAPP_XW ) / cment_ );
-	// return ()
 }
 
 // histogram to data ( hist entries to data range )

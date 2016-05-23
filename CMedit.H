@@ -251,6 +251,8 @@ protected:
 	int redo_stack_count;
 	// **** Coordinates Transformations
 
+	int cmapw();
+	int wx2cmapx( int wx );
 	//windows to drawing
 	float wx2drx( int wx ); ///< pixel coordinate comes in as int
 

@@ -20,11 +20,15 @@
 #define  DTHIST_YH    (DTHIST_YMAX-DTHIST_YMIN)
 
 
+#define  CMAP_XMIN  0
+#define  CMAP_XMAX  cmapw()
+#define  CMAP_XW    (CMAP_XMAX - CMAP_XMIN)
+
 #define  CMAP_YMIN  0
 #define  CMAP_YMAX  cmap_y_max_
 #define  CMAP_YH    (CMAP_YMAX-CMAP_YMIN)
 
-
+// Don't need
 #define  CMAPAPP_XMIN  data_x_min_for_cmap_
 #define  CMAPAPP_XMAX  data_x_max_for_cmap_
 #define  CMAPAPP_XW    (CMAPAPP_XMAX-CMAPAPP_XMIN)
@@ -32,9 +36,10 @@
 
 #define  DR_XMIN    (-1/16.f)
 #define  DR_XMAX    (1.0)
+// #define  DR_XMAX    w() + DR_XMIN
 #define  DR_XW      (DR_XMAX-DR_XMIN)
 #define  DR_X0   	(0.0)
-#define  DR_XFROM0  (DR_XMAX-DR_X0)  
+#define  DR_XFROM0  (DR_XMAX-DR_X0)
 //Y
 #define  DR_YMIN    (-0.25)
 #define  DR_YMAX    (1.0)
@@ -55,6 +60,7 @@
 #define  HDISP_YMAX  data_y_max_for_hist_display_
 #define  HDISP_YH    (HDISP_YMAX-HDISP_YMIN)
 
+// Don't need
 #define  CDISP_YMIN  data_y_min_for_cmap_display_
 #define  CDISP_YMAX  data_y_max_for_cmap_display_
 #define  CDISP_YH    (CDISP_YMAX-CDISP_YMIN)
@@ -69,13 +75,23 @@
 	}
 
 */
+
+int CMedit::cmapw() {
+	return int((15/16.f)*w());
+}
+
+int CMedit::wx2cmapx( int wx ) {
+	return wx - int((1/16.f)*w());
+}
+
 // windows to drawing
 float CMedit::wx2drx( int wx ) {//pixel coordinate comes in as int
-	printf("%d %d\n", wx, w());
-	// return (DR_XMIN + wx * ( DR_XW ) / w())
+	// printf("%d %d\n", wx, w());
+	return (DR_XMIN + wx * ( DR_XW ) / w());
 	// return (wx + (-1/16.f)*w());
-	return wx;
+	// return wx;
 }
+
 float CMedit::wy2dry( int wy ) {//pixel coordinate comes in as int
   return (DR_YMAX - wy * ( DR_YH ) / h());
 }
@@ -83,10 +99,11 @@ float CMedit::wy2dry( int wy ) {//pixel coordinate comes in as int
 // data to drawing (Actually only converting the displaying part, between DISP_XMIN and DISP_XMAX, to drawing)
 float CMedit::dtx2drx( float dtx ) {
   // return (( dtx - DTHIST_XMIN ) * ( DR_XFROM0 ) / DTHIST_XW);
-	// return ( 0 + ( dtx - DISP_XMIN ) * ( DR_XFROM0 ) / DISP_XW );
-	return ( 0 + ( dtx - DISP_XMIN ) * w()*15/16 / DISP_XW );
+	return ( 0 + ( dtx - DISP_XMIN ) * ( DR_XFROM0 ) / DISP_XW );
+	// return ( 0 + ( dtx - DISP_XMIN ) * w()*15/16 / DISP_XW );
 
 }// data to drawing (Actually only converting the displaying part, between HDISP_YMIN and HDISP_YMAX, to drawing)
+
 float CMedit::hdty2dry( float hdty ) {
   return ( 0 + ( hdty - HDISP_YMIN ) * ( DR_YFROM0 ) / HDISP_YH );
 }
@@ -97,8 +114,8 @@ float CMedit::cdty2dry( float cdty ) {
 
 // drawing to data ( Actually to data range for display, between DISP_XMIN and DISP_XMAX I think ... )
 float CMedit::drx2dtx( float drx ) {
-  // return ( DISP_XMIN + (drx) * ( DISP_XW ) / DR_XFROM0 );
-  return ( DISP_XMIN + (drx) * ( DISP_XW ) / (w()*15/16) ); 
+  return ( DISP_XMIN + (drx) * ( DISP_XW ) / DR_XFROM0 );
+  // return ( DISP_XMIN + (drx) * ( DISP_XW ) / (w()*15/16) ); 
 }
 
 float CMedit::dry2hdty( float dry ) {
@@ -108,7 +125,6 @@ float CMedit::dry2hdty( float dry ) {
 // colormap to data ( Actually the cmap entries to data range which the cmap apply to )
 float CMedit::cmapx2dtx( int cmapx ) {
 	return ( CMAPAPP_XMIN + (cmapx) * ( CMAPAPP_XW ) / cment_ );
-	// return ()
 }
 
 // histogram to data ( hist entries to data range )
@@ -116,17 +132,17 @@ float CMedit::histx2dtx( int histx ) {
 	return ( DTHIST_XMIN + ( histx ) * ( DTHIST_XW ) / hisent_ );
 }
 
-
 //data to colormap
 int CMedit::dtx2cmapx( float dtx ) {
-  if (dtx < CMAPAPP_XMIN) {
+  // if (dtx < CMAPAPP_XMIN) {
+  if (dtx < CMAP_XMIN) {
     return -1;
   }
-  else if (dtx > CMAPAPP_XMAX) {
+  else if (dtx > CMAP_XMAX) {
     return cment_ + 1;
   }
   else {
-    int cmap_ind = (int) ( 0 + (dtx - CMAPAPP_XMIN) * ( cment_ ) / CMAPAPP_XW);
+    int cmap_ind = (int) ( 0 + (dtx - CMAP_XMIN) * ( CMAP_XMAX ) / CMAP_XW);
     return cmap_ind;
   }
 }
@@ -644,7 +660,8 @@ void CMedit::draw() {
 		glColor3f( 1,1,0 ); /* Hue: yellow */
 		float midhue = y2hue(.5);
 		glBegin( GL_LINE_STRIP );
-		for(i = 0; i <= cment_-1; i++) {
+		// for(i = 0; i <= cment_-1; i++) {
+		for(i = 0; i <= cmapw()-1; i++) {
 			v = hue2y( huenear( vh[i], midhue ) ); //Need to worry about vh stuffs???
 			glVertex2f( dtx2drx(cmapx2dtx(i)),  v);
 	 		if(coarse) glVertex2f( dtx2drx(cmapx2dtx(i+1)), v );
@@ -653,7 +670,9 @@ void CMedit::draw() {
 
 		glColor3f( .3,1,.25 );  /* Saturation: teal */
 		glBegin( GL_LINE_STRIP );
-		for(i = 0; i <= cment_-1; i++) {
+		// for(i = 0; i <= cment_-1; i++) {
+		for(i = 0; i <= cmapw()-1; i++) {
+			printf("%d\n", i);
 			glVertex2f( dtx2drx(cmapx2dtx(i)), vs[i] );
 			if(coarse) glVertex2f( dtx2drx(cmapx2dtx(i+1)), vs[i] );
 		}
@@ -661,7 +680,8 @@ void CMedit::draw() {
 
 		glColor3f( .5,.2,1 );  /* Brightness: purple */
 		glBegin( GL_LINE_STRIP );
-		for(i = 0; i <= cment_-1; i++) {
+		// for(i = 0; i <= cment_-1; i++) {
+		for(i = 0; i <= cmapw()-1; i++) {
 			glVertex2f( dtx2drx(cmapx2dtx(i)), vb[i] );
 			if(coarse) glVertex2f( dtx2drx(cmapx2dtx(i+1)), vb[i] );
 		}
@@ -671,7 +691,8 @@ void CMedit::draw() {
 	else {
 		float r[CMENTMAX], g[CMENTMAX], b[CMENTMAX];
 
-		for(i = 0; i <= cment_-1; i++) {
+		// for(i = 0; i <= cment_-1; i++) {
+		for(i = 0; i <= cmapw()-1; i++) {
 			hsb2rgb( vh[i], vs[i], vb[i], &r[i], &g[i], &b[i] );    
 		}
 
@@ -686,7 +707,8 @@ void CMedit::draw() {
 
 		glColor3f( 0,1,0 );  /* green */
 		glBegin( GL_LINE_STRIP );
-		for(i = 0; i <= cment_-1; i++) {
+		// for(i = 0; i <= cment_-1; i++) {
+		for(i = 0; i <= cmapw()-1; i++) {
 			glVertex2f( dtx2drx(cmapx2dtx(i)), g[i] );
 			if(coarse) glVertex2f( dtx2drx(cmapx2dtx(i+1)), g[i] );
 		}
@@ -765,6 +787,8 @@ void CMedit::draw() {
 }
 
 void CMedit::resize(int nx, int ny, int nw, int nh) {
+	cment_ = snapcment_ = cmapw();
+
 	w(nw);
 	h(nh);
 	hide();
@@ -789,7 +813,8 @@ int CMedit::handle(int ev) {
 
 int CMedit::handle_drawing(int ev) {
 
-	int x = dtx2cmapx(drx2dtx(wx2drx( Fl::event_x() )));
+	// int x = dtx2cmapx(drx2dtx(wx2drx( Fl::event_x() )));
+	int x = wx2cmapx( Fl::event_x() );
 	// x value in data coord
 	float y = wy2dry( Fl::event_y() );
 	// y value in drawing coord
@@ -1247,7 +1272,9 @@ void CMedit::init() {
 	editing_mode = 1;
 	hist_ent_arr = NULL;
 
-	cment_ = snapcment_ = 256;
+	// cment_ = snapcment_ = 256;
+	cment_ = snapcment_ = cmapw();
+
 	remin = 0;
 	remax = cment()-1;
 

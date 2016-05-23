@@ -302,6 +302,20 @@ protected:
 
 	void (*range_updater)(CMedit *);
 
+// =====interpolation======
+
+	int start_flag;
+	int intStart;
+	float valStart;
+	int intEnd;
+	float valEnd;
+
+// =====END interpolation======
+
+
+
+
+
 
 	// **** Other Stuffs for now END
 

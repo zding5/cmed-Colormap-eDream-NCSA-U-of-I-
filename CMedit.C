@@ -672,7 +672,7 @@ void CMedit::draw() {
 		glBegin( GL_LINE_STRIP );
 		// for(i = 0; i <= cment_-1; i++) {
 		for(i = 0; i <= cmapw()-1; i++) {
-			printf("%d\n", i);
+			// printf("%d\n", i);
 			glVertex2f( dtx2drx(cmapx2dtx(i)), vs[i] );
 			if(coarse) glVertex2f( dtx2drx(cmapx2dtx(i+1)), vs[i] );
 		}
@@ -787,10 +787,12 @@ void CMedit::draw() {
 }
 
 void CMedit::resize(int nx, int ny, int nw, int nh) {
-	cment_ = snapcment_ = cmapw();
-
 	w(nw);
 	h(nh);
+	// cment_ = snapcment_ = cmapw();
+	// Need to resample....????
+
+	cment(cmapw());
 	hide();
 	show();
 }
@@ -1003,6 +1005,70 @@ void CMedit::fluid_zooming( float x0, float x1, float y0, float y1 ) {
 }
 
 int CMedit::handle_interpolation(int ev) {
+
+	int x = wx2cmapx( Fl::event_x() );
+	float y = wy2dry( Fl::event_y() );
+	int field = 0;
+	switch(ev) {
+		case FL_SHORTCUT: // undo
+		return 0;
+
+		case FL_PUSH: //
+
+		if(Fl::event_state(FL_SHIFT)) {
+			field = ALPHA;
+		}
+		else {
+		// Which button?  Take account of alt/meta modifiers too.
+			int btn = 1;
+			if(Fl::event_state(FL_BUTTON2 | FL_ALT)) {
+				btn = 2;
+			}
+			else if(Fl::event_state(FL_BUTTON3 | FL_META)) {
+				btn = 3;
+			}
+			static CMfield btn2field[2][3] = {
+				{ RED, GREEN, BLUE },
+				{ HUE, SAT, BRIGHT }
+			};
+			field = btn2field[ hsbmode ][ btn-1 ];
+		}
+
+		if(start_flag == 1){
+			intStart = x;
+			valStart = y;
+			start_flag = 0;
+
+			printf("First Click: %d %f\n", intStart, valStart);
+		}
+		else {
+			intEnd = x;
+			valEnd = y;
+			printf("Second Click: %d %f\n", intEnd, valEnd);
+			switch(field) {
+				case HUE:
+				for (int i=intStart;i<=intEnd;i++){
+					vh[i] = valStart + (i-intStart)*(valEnd - valStart)/float(intEnd - intStart);
+					printf("%f\n", vh[i]);
+				}
+				case SAT:
+				for (int i=intStart;i<=intEnd;i++){
+					vs[i] = valStart + (i-intStart)*(valEnd - valStart)/(intEnd - intStart);
+				}
+				case BRIGHT:
+				for (int i=intStart;i<=intEnd;i++){
+					vb[i] = valStart + (i-intStart)*(valEnd - valStart)/(intEnd - intStart);
+				}
+				case ALPHA:
+				for (int i=intStart;i<=intEnd;i++){
+					alpha[i] = valStart + (i-intStart)*(valEnd - valStart)/(intEnd - intStart);
+				}
+			}
+			redraw();
+			start_flag = 1;
+		}
+
+	}
 	return 0;
 }
 
@@ -1267,9 +1333,13 @@ void CMedit::init() {
 	data_y_max_for_hist_display_ori_ = data_y_max_for_hist_display_;
 	data_y_min_for_hist_display_ori_ = data_y_min_for_hist_display_;
 
+	int start_flag = 1;
+	int intStart = 0;
+	float valStart = 0.0;
+	int intEnd = 0;
+	float valEnd = 0.0;
 
-
-	editing_mode = 1;
+	editing_mode = 3;
 	hist_ent_arr = NULL;
 
 	// cment_ = snapcment_ = 256;

@@ -1033,36 +1033,40 @@ int CMedit::handle_interpolation(int ev) {
 			};
 			field = btn2field[ hsbmode ][ btn-1 ];
 		}
-
+printf("flaggg: %d, %d, %f\n", start_flag, x, y);
 		if(start_flag == 1){
 			intStart = x;
 			valStart = y;
 			start_flag = 0;
 
-			printf("First Click: %d %f\n", intStart, valStart);
+			// printf("First Click: %d %f\n", intStart, valStart);
 		}
 		else {
 			intEnd = x;
 			valEnd = y;
-			printf("Second Click: %d %f\n", intEnd, valEnd);
+			// printf("Second Click: %d %f\n", intEnd, valEnd);
 			switch(field) {
 				case HUE:
 				for (int i=intStart;i<=intEnd;i++){
 					vh[i] = valStart + (i-intStart)*(valEnd - valStart)/float(intEnd - intStart);
-					printf("%f\n", vh[i]);
 				}
+				break;
 				case SAT:
 				for (int i=intStart;i<=intEnd;i++){
 					vs[i] = valStart + (i-intStart)*(valEnd - valStart)/(intEnd - intStart);
 				}
+				break;
 				case BRIGHT:
 				for (int i=intStart;i<=intEnd;i++){
 					vb[i] = valStart + (i-intStart)*(valEnd - valStart)/(intEnd - intStart);
 				}
+				break;
 				case ALPHA:
 				for (int i=intStart;i<=intEnd;i++){
 					alpha[i] = valStart + (i-intStart)*(valEnd - valStart)/(intEnd - intStart);
 				}
+				break;
+				default: printf("%s\n", "AH!!"); break;
 			}
 			redraw();
 			start_flag = 1;
@@ -1333,11 +1337,11 @@ void CMedit::init() {
 	data_y_max_for_hist_display_ori_ = data_y_max_for_hist_display_;
 	data_y_min_for_hist_display_ori_ = data_y_min_for_hist_display_;
 
-	int start_flag = 1;
-	int intStart = 0;
-	float valStart = 0.0;
-	int intEnd = 0;
-	float valEnd = 0.0;
+	start_flag = 1;
+	intStart = 0;
+	valStart = 0.0;
+	intEnd = 0;
+	valEnd = 0.0;
 
 	editing_mode = 3;
 	hist_ent_arr = NULL;

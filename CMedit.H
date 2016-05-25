@@ -21,6 +21,7 @@
 #include <ctype.h>
 #include <stack>
 #include <deque>
+#include <vector>
 
 // ***** Constants Definitions
 
@@ -41,6 +42,14 @@ enum CMfield {
 struct colorEnt {
 	int this_cment;
 	float ent[4][CMENTMAX];
+};
+
+struct contPoint
+{
+	float data_x;
+	float data_y;
+	// int field;
+	int type;
 };
 
 // ***** Constants Definitions END
@@ -304,11 +313,20 @@ protected:
 
 // =====interpolation======
 
-	int start_flag;
-	int intStart;
-	float valStart;
-	int intEnd;
-	float valEnd;
+	// int start_flag;
+	// int intStart;
+	// float valStart;
+	// int intEnd;
+	// float valEnd;
+
+	std::vector<contPoint> HUE_con_points; // x, y, type_of_interpolation; 0: linear
+	std::vector<contPoint> SAT_con_points;
+	std::vector<contPoint> BRI_con_points;
+	std::vector<contPoint> ALP_con_points;
+
+	int interp_linear(int x, float y, int field);
+	int interp_linear_onePoint(int x, float y, std::vector<contPoint> v, float (&arr)[CMENTMAX]);
+	void insert_into_controls(int x, float y, std::vector<contPoint> &v, int type);
 
 // =====END interpolation======
 

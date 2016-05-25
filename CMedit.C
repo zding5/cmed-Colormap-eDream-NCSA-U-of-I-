@@ -28,7 +28,7 @@
 #define  CMAP_YMAX  cmap_y_max_
 #define  CMAP_YH    (CMAP_YMAX-CMAP_YMIN)
 
-// Don't need
+// The range in data coord for which the cmap is applied to
 #define  CMAPAPP_XMIN  data_x_min_for_cmap_
 #define  CMAPAPP_XMAX  data_x_max_for_cmap_
 #define  CMAPAPP_XW    (CMAPAPP_XMAX-CMAPAPP_XMIN)
@@ -134,11 +134,12 @@ float CMedit::histx2dtx( int histx ) {
 
 //data to colormap
 int CMedit::dtx2cmapx( float dtx ) {
-  // if (dtx < CMAPAPP_XMIN) {
-  if (dtx < CMAP_XMIN) {
+  if (dtx < CMAPAPP_XMIN) {
+  // if (dtx < CMAP_XMIN) {
     return -1;
   }
-  else if (dtx > CMAP_XMAX) {
+  else if (dtx > CMAPAPP_XMAX) {
+  // else if (dtx > CMAP_XMAX) {
     return cment_ + 1;
   }
   else {
@@ -1033,45 +1034,101 @@ int CMedit::handle_interpolation(int ev) {
 			};
 			field = btn2field[ hsbmode ][ btn-1 ];
 		}
-printf("flaggg: %d, %d, %f\n", start_flag, x, y);
-		if(start_flag == 1){
-			intStart = x;
-			valStart = y;
-			start_flag = 0;
+	
+		interp_linear(x, y, field);
 
-			// printf("First Click: %d %f\n", intStart, valStart);
+	}
+	return 0;
+}
+
+int CMedit::interp_linear(int x, float y, int field) {
+
+	switch(field) {
+		case HUE:
+		printf("%s\n", "handle HUE");
+			interp_linear_onePoint(x, y, HUE_con_points, vh);
+			insert_into_controls(x, y, HUE_con_points, 0);
+		break;
+		case SAT:
+			interp_linear_onePoint(x, y, SAT_con_points, vs);
+			insert_into_controls(x, y, SAT_con_points, 0);
+		break;
+		case BRIGHT:
+			interp_linear_onePoint(x, y, BRI_con_points, vb);
+			insert_into_controls(x, y, BRI_con_points, 0);
+		break;
+		case ALPHA:
+			interp_linear_onePoint(x, y, ALP_con_points, alpha);
+			insert_into_controls(x, y, ALP_con_points, 0);
+		break;
+		default: printf("%s\n", "AH!!"); break;
+	}
+	redraw();
+	return 0;
+
+}
+
+void CMedit::insert_into_controls(int x, float y, std::vector<contPoint> &v, int type) {
+	std::vector<contPoint>::iterator it = v.begin();
+	if(cmapx2dtx(x) < v[0].data_x){
+		contPoint cp;
+		cp.data_x = cmapx2dtx(x);
+		cp.data_y = y;
+		cp.type = type;
+		v.insert(it, cp);
+	}
+	else if(cmapx2dtx(x) > v[v.size()-1].data_x) {
+		contPoint cp;
+		cp.data_x = cmapx2dtx(x);
+		cp.data_y = y;
+		cp.type = type;
+		v.push_back(cp);
+	}
+	for (int i=0; i<v.size()-1; i++) {
+		if(cmapx2dtx(x) >= v[i-1].data_x && cmapx2dtx(x) <= v[i].data_x) {
+			contPoint cp;
+			cp.data_x = cmapx2dtx(x);
+			cp.data_y = y;
+			cp.type = type;
+			v.insert(it+i, cp);
 		}
-		else {
-			intEnd = x;
-			valEnd = y;
-			// printf("Second Click: %d %f\n", intEnd, valEnd);
-			switch(field) {
-				case HUE:
-				for (int i=intStart;i<=intEnd;i++){
-					vh[i] = valStart + (i-intStart)*(valEnd - valStart)/float(intEnd - intStart);
+	}	
+}
+
+int CMedit::interp_linear_onePoint(int x, float y, std::vector<contPoint> v, float (&arr)[CMENTMAX]) {
+	if(cmapx2dtx(x) < v[0].data_x){
+	printf("Smallest\n");
+		float dx = dtx2cmapx(v[0].data_x);
+		for (int j=x;j<=dx;j++){ // edge cases...cmap not applied to certain part of data range??
+			arr[j] = y + j*(v[0].data_y - y)/float(dx - x);
+		printf("the arr[j] is %f, and vh[j] %f\n", arr[j], vh[j]);
+		}
+	}
+	else if(cmapx2dtx(x) > v[v.size()-1].data_x) {
+	printf("Biggest\n");
+		float dx = dtx2cmapx(v[v.size()-1].data_x);
+		for (int j=dx;j<=x;j++){ // edge cases...cmap not applied to certain part of data range??
+			arr[j] = v[v.size()-1].data_y + j*(y - v[v.size()].data_y)/float(x - dx);
+		printf("the arr[j] is %f, and vh[j] %f\n", arr[j], vh[j]);
+		}
+	}
+	else {
+	printf("Middle\n");
+	printf("%d\n", v.size());
+		for (int i=1; i<=v.size()-1; i++) {
+			float dx_pre = dtx2cmapx(v[i-1].data_x);
+			float dx_aft = dtx2cmapx(v[i].data_x);
+	printf("%f, %f\n", dx_pre, dx_aft, cmapx2dtx(x));
+			if(cmapx2dtx(x) >= v[i-1].data_x && cmapx2dtx(x) <= v[i].data_x) {
+				for (int j=dx_pre;j<=x;j++){ // edge cases...cmap not applied to certain part of data range??
+					arr[j] = v[i-1].data_y + j*(y - v[i-1].data_y)/float(x - dx_pre);
+	printf("the arr[j] is %f, and vh[j] %f\n", arr[j], vh[j]);
 				}
-				break;
-				case SAT:
-				for (int i=intStart;i<=intEnd;i++){
-					vs[i] = valStart + (i-intStart)*(valEnd - valStart)/(intEnd - intStart);
+				for (int j=x;j<=dx_aft;j++){ // edge cases...cmap not applied to certain part of data range??
+					arr[j] = y + j*(v[i].data_y - y)/float(dx_aft - x);
 				}
-				break;
-				case BRIGHT:
-				for (int i=intStart;i<=intEnd;i++){
-					vb[i] = valStart + (i-intStart)*(valEnd - valStart)/(intEnd - intStart);
-				}
-				break;
-				case ALPHA:
-				for (int i=intStart;i<=intEnd;i++){
-					alpha[i] = valStart + (i-intStart)*(valEnd - valStart)/(intEnd - intStart);
-				}
-				break;
-				default: printf("%s\n", "AH!!"); break;
 			}
-			redraw();
-			start_flag = 1;
 		}
-
 	}
 	return 0;
 }
@@ -1337,11 +1394,6 @@ void CMedit::init() {
 	data_y_max_for_hist_display_ori_ = data_y_max_for_hist_display_;
 	data_y_min_for_hist_display_ori_ = data_y_min_for_hist_display_;
 
-	start_flag = 1;
-	intStart = 0;
-	valStart = 0.0;
-	intEnd = 0;
-	valEnd = 0.0;
 
 	editing_mode = 3;
 	hist_ent_arr = NULL;
@@ -1364,6 +1416,14 @@ void CMedit::init() {
 
 	undo_stack_count = 0;
 	redo_stack_count = 0;
+
+	contPoint cp0; cp0.data_x = 0.0; cp0.data_y = 0.2; cp0.type = 0;
+	contPoint cp1; cp1.data_x = 1.0; cp1.data_y = 0.8; cp1.type = 0;
+
+	HUE_con_points.push_back(cp0);HUE_con_points.push_back(cp1);
+	SAT_con_points.push_back(cp0);SAT_con_points.push_back(cp1);
+	BRI_con_points.push_back(cp0);BRI_con_points.push_back(cp1);
+	ALP_con_points.push_back(cp0);ALP_con_points.push_back(cp1);
 
 	ncomments = 0;
 	maxcomments = 8;

@@ -1045,9 +1045,12 @@ int CMedit::interp_linear(int x, float y, int field) {
 
 	switch(field) {
 		case HUE:
-		printf("%s\n", "handle HUE");
 			interp_linear_onePoint(x, y, HUE_con_points, vh);
 			insert_into_controls(x, y, HUE_con_points, 0);
+			for(int i=0; i<HUE_con_points.size();i++) {
+				printf("%f ", HUE_con_points[i].data_x);
+			}
+			printf("\n");
 		break;
 		case SAT:
 			interp_linear_onePoint(x, y, SAT_con_points, vs);
@@ -1069,13 +1072,13 @@ int CMedit::interp_linear(int x, float y, int field) {
 }
 
 void CMedit::insert_into_controls(int x, float y, std::vector<contPoint> &v, int type) {
-	std::vector<contPoint>::iterator it = v.begin();
+	// std::vector<contPoint>::iterator it = v.begin();
 	if(cmapx2dtx(x) < v[0].data_x){
 		contPoint cp;
 		cp.data_x = cmapx2dtx(x);
 		cp.data_y = y;
 		cp.type = type;
-		v.insert(it, cp);
+		v.insert(v.begin(), cp);
 	}
 	else if(cmapx2dtx(x) > v[v.size()-1].data_x) {
 		contPoint cp;
@@ -1084,15 +1087,24 @@ void CMedit::insert_into_controls(int x, float y, std::vector<contPoint> &v, int
 		cp.type = type;
 		v.push_back(cp);
 	}
-	for (int i=0; i<v.size()-1; i++) {
-		if(cmapx2dtx(x) >= v[i-1].data_x && cmapx2dtx(x) <= v[i].data_x) {
-			contPoint cp;
-			cp.data_x = cmapx2dtx(x);
-			cp.data_y = y;
-			cp.type = type;
-			v.insert(it+i, cp);
+	else{
+printf("insertttttt\n");
+		for (int i=1; i<v.size()-1; i++) {
+			if(cmapx2dtx(x) >= v[i-1].data_x && cmapx2dtx(x) <= v[i].data_x) {
+				contPoint cp;
+				cp.data_x = cmapx2dtx(x);
+				cp.data_y = y;
+				cp.type = type;
+				v.insert(v.begin()+i, cp); // Doesn't insert....
+				for(int k=0; k<v.size();k++) {
+				printf("%f ", v[k].data_x);
+			}
+			printf("\n");
+				break;
+			}
 		}
-	}	
+	}
+
 }
 
 int CMedit::interp_linear_onePoint(int x, float y, std::vector<contPoint> v, float (&arr)[CMENTMAX]) {
@@ -1113,20 +1125,17 @@ int CMedit::interp_linear_onePoint(int x, float y, std::vector<contPoint> v, flo
 		}
 	}
 	else {
-	printf("Middle\n");
-	printf("%d\n", v.size());
 		for (int i=1; i<=v.size()-1; i++) {
-			float dx_pre = dtx2cmapx(v[i-1].data_x);
-			float dx_aft = dtx2cmapx(v[i].data_x);
-	printf("%f, %f\n", dx_pre, dx_aft, cmapx2dtx(x));
 			if(cmapx2dtx(x) >= v[i-1].data_x && cmapx2dtx(x) <= v[i].data_x) {
-				for (int j=dx_pre;j<=x;j++){ // edge cases...cmap not applied to certain part of data range??
+				float dx_pre = dtx2cmapx(v[i-1].data_x);
+				float dx_aft = dtx2cmapx(v[i].data_x);
+				for (int j=dx_pre;j<x;j++){ // edge cases...cmap not applied to certain part of data range??
 					arr[j] = v[i-1].data_y + j*(y - v[i-1].data_y)/float(x - dx_pre);
-	printf("the arr[j] is %f, and vh[j] %f\n", arr[j], vh[j]);
 				}
 				for (int j=x;j<=dx_aft;j++){ // edge cases...cmap not applied to certain part of data range??
 					arr[j] = y + j*(v[i].data_y - y)/float(dx_aft - x);
 				}
+				break;
 			}
 		}
 	}
@@ -1419,21 +1428,37 @@ void CMedit::init() {
 
 	contPoint cp0; cp0.data_x = 0.0; cp0.data_y = 0.2; cp0.type = 0;
 	contPoint cp1; cp1.data_x = 1.0; cp1.data_y = 0.8; cp1.type = 0;
+	contPoint cp2; cp2.data_x = 0.0; cp2.data_y = 0.1; cp2.type = 0;
+	contPoint cp3; cp3.data_x = 1.0; cp3.data_y = 0.7; cp3.type = 0;
+	contPoint cp4; cp4.data_x = 0.0; cp4.data_y = 0.2; cp4.type = 0;
+	contPoint cp5; cp5.data_x = 1.0; cp5.data_y = 0.6; cp5.type = 0;
+	contPoint cp6; cp6.data_x = 0.0; cp6.data_y = 0.3; cp6.type = 0;
+	contPoint cp7; cp7.data_x = 1.0; cp7.data_y = 0.9; cp7.type = 0;
 
 	HUE_con_points.push_back(cp0);HUE_con_points.push_back(cp1);
-	SAT_con_points.push_back(cp0);SAT_con_points.push_back(cp1);
-	BRI_con_points.push_back(cp0);BRI_con_points.push_back(cp1);
-	ALP_con_points.push_back(cp0);ALP_con_points.push_back(cp1);
+	SAT_con_points.push_back(cp2);SAT_con_points.push_back(cp3);
+	BRI_con_points.push_back(cp4);BRI_con_points.push_back(cp5);
+	ALP_con_points.push_back(cp6);ALP_con_points.push_back(cp7);
+
+
 
 	ncomments = 0;
 	maxcomments = 8;
 	comments = (char **)malloc( maxcomments * sizeof(char *) );
 
-	for(int k = 0; k < cment_; k++) {
-		vh[k] = 1 - .5*k / cment_;
-		vs[k] = .5;
-		vb[k] = .25 + .75*k / cment_;
-		alpha[k] = .33 + .67 * k*k / (cment_*cment_);
+	// for(int k = 0; k < cment_; k++) {
+	// 	vh[k] = 1 - .5*k / cment_;
+	// 	vs[k] = .5;
+	// 	vb[k] = .25 + .75*k / cment_;
+	// 	alpha[k] = .33 + .67 * k*k / (cment_*cment_);
+	// }
+
+	for(int k=0; k<cmapw(); k++) {
+		vh[k] = 0.2 + k*0.6/cmapw();
+		vs[k] = 0.1 + k*0.6/cmapw();
+		vb[k] = 0.2 + k*0.4/cmapw();
+		alpha[k] = 0.3 + k*0.6/cmapw();
 	}
+
 	snapshot();
 }

@@ -327,6 +327,7 @@ protected:
 	int interp_linear(int x, float y, int field);
 	int interp_linear_onePoint(int x, float y, std::vector<contPoint> v, float (&arr)[CMENTMAX]);
 	void insert_into_controls(int x, float y, std::vector<contPoint> &v, int type);
+	void init_contPoints();
 
 // =====END interpolation======
 

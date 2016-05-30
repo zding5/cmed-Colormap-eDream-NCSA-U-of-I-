@@ -238,7 +238,7 @@ protected:
 	float data_x_min_for_display_; ///< The minimum value in data range which part of histgram & cmap we want to display.
 	float data_x_max_for_display_; ///< The maximum value in data range which part of histgram & cmap we want to display.
 
-	float data_y_min_for_hist_display_; ///< 
+	float data_y_min_for_hist_display_;
 	float data_y_max_for_hist_display_;
 	float data_y_min_for_cmap_display_;
 	float data_y_max_for_cmap_display_; 
@@ -313,12 +313,6 @@ protected:
 
 // =====interpolation======
 
-	// int start_flag;
-	// int intStart;
-	// float valStart;
-	// int intEnd;
-	// float valEnd;
-
 	std::vector<contPoint> HUE_con_points; // x, y, type_of_interpolation; 0: linear
 	std::vector<contPoint> SAT_con_points;
 	std::vector<contPoint> BRI_con_points;
@@ -328,6 +322,7 @@ protected:
 	int interp_linear_onePoint(int x, float y, std::vector<contPoint> v, float (&arr)[CMENTMAX]);
 	void insert_into_controls(int x, float y, std::vector<contPoint> &v, int type);
 	void init_contPoints();
+	void interp_for_scaling();
 
 // =====END interpolation======
 

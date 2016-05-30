@@ -8,7 +8,7 @@ decl {\#include "cmed.H"} {private local
 Function {make_window()} {open
 } {
   Fl_Window {} {open
-    xywh {655 251 400 610} type Double resizable visible
+    xywh {655 251 400 610} type Double hide resizable
   } {
     Fl_Button undobutton {
       label Undo
@@ -101,7 +101,7 @@ Function {make_window()} {open
         }
         MenuItem menu_redo {
           label Redo
-          callback menu_redo_cb selected
+          callback menu_redo_cb
           xywh {0 0 36 21} shortcut 0x40079
         }
       }
@@ -132,6 +132,12 @@ Function {make_window()} {open
           callback change_mode
           xywh {0 0 36 21}
           code0 {o->shortcut(FL_SHIFT + FL_ALT + 's');}
+        }
+        MenuItem {} {
+          label {Interpolation Mode}
+          user_data 3 user_data_type long
+          callback change_mode selected
+          xywh {0 0 36 21}
         }
       }
     }

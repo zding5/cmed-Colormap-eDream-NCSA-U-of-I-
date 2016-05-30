@@ -27,6 +27,7 @@ Fl_Menu_Item menu_[] = {
  {"&Modes", 0,  0, 0, 64, FL_NORMAL_LABEL, 0, 14, 0},
  {"Drawing Mode", 0,  (Fl_Callback*)change_mode, (void*)(1), 0, FL_NORMAL_LABEL, 0, 14, 0},
  {"&Scaling Mode", 0,  (Fl_Callback*)change_mode, (void*)(2), 0, FL_NORMAL_LABEL, 0, 14, 0},
+ {"Interpolation Mode", 0,  (Fl_Callback*)change_mode, (void*)(3), 0, FL_NORMAL_LABEL, 0, 14, 0},
  {0,0,0,0,0,0,0,0,0},
  {0,0,0,0,0,0,0,0,0}
 };

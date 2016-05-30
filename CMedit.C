@@ -989,6 +989,7 @@ void CMedit::fluid_moving( float x0, float x1, float y0, float y1 ) {
 	printf("data x for display: %f, %f\n", data_x_min_for_display_, data_x_max_for_display_);
 	
 	updaterange();
+	interp_for_scaling();
 	redraw();
 }
 
@@ -1006,7 +1007,36 @@ void CMedit::fluid_zooming( float x0, float x1, float y0, float y1 ) {
 	data_y_max_for_hist_display_ += change_y;
 
 	updaterange();
+	interp_for_scaling();
 	redraw();
+}
+
+void CMedit::interp_for_scaling() {
+	for (int i=0; i<HUE_con_points.size(); i++) {
+		vh[i] = -1;
+		if(HUE_con_points[i].data_x >= DISP_XMIN && HUE_con_points[i].data_x <= DISP_XMAX) {
+			interp_linear_onePoint(HUE_con_points[i].data_x, HUE_con_points[i].data_y, HUE_con_points, vh);
+		}
+	}
+	for (int i=0; i<SAT_con_points.size(); i++) {
+		vs[i] = -1;
+		if(SAT_con_points[i].data_x >= DISP_XMIN && SAT_con_points[i].data_x <= DISP_XMAX) {
+			interp_linear_onePoint(SAT_con_points[i].data_x, SAT_con_points[i].data_y, SAT_con_points, vs);
+		}
+	}
+	for (int i=0; i<BRI_con_points.size(); i++) {
+		vb[i] = -1;
+		if(BRI_con_points[i].data_x >= DISP_XMIN && BRI_con_points[i].data_x <= DISP_XMAX) {
+			interp_linear_onePoint(BRI_con_points[i].data_x, BRI_con_points[i].data_y, BRI_con_points, vb);
+		}
+	}
+	for (int i=0; i<ALP_con_points.size(); i++) {
+		alpha[i] = -1;		
+		if(ALP_con_points[i].data_x >= DISP_XMIN && ALP_con_points[i].data_x <= DISP_XMAX) {
+			interp_linear_onePoint(ALP_con_points[i].data_x, ALP_con_points[i].data_y, ALP_con_points, alpha);
+		}
+	}
+	// redraw();
 }
 
 int CMedit::handle_interpolation(int ev) {
@@ -1111,11 +1141,6 @@ printf("insertttttt\n");
 int CMedit::interp_linear_onePoint(int x, float y, std::vector<contPoint> v, float (&arr)[CMENTMAX]) {
 	if(cmapx2dtx(x) < v[0].data_x){
 	printf("Smallest\n");
-		// float dx = dtx2cmapx(v[0].data_x);
-		// for (int j=x;j<=dx;j++){ // edge cases...click on strips....??
-			// arr[j] = y + j*(v[0].data_y - y)/float(dx - x);
-		// printf("the arr[j] is %f, and vh[j] %f\n", arr[j], vh[j]);
-		// }
 		if(v[0].data_x <= DISP_XMAX) {
 			for (int i=x; i< dtx2cmapx(v[0].data_x); i++) {
 				arr[i] = y + cmapx2dtx(i-x)*(v[0].data_y - y)/(v[0].data_x - cmapx2dtx(x));
@@ -1130,10 +1155,6 @@ int CMedit::interp_linear_onePoint(int x, float y, std::vector<contPoint> v, flo
 
 	else if(cmapx2dtx(x) > v[v.size()-1].data_x) {
 	printf("Biggest\n");
-		// float dx = dtx2cmapx(v[v.size()-1].data_x);
-		// for (int j=dx;j<=x;j++){ // edge cases...click on strips....??
-			// arr[j] = v[v.size()-1].data_y + j*(y - v[v.size()].data_y)/float(x - dx);
-		// }
 		if(v[v.size()-1].data_x <= DISP_XMIN) {
 			for (int i=0; i<=x; i++) {
 				arr[i] = v[v.size()-1].data_y + (cmapx2dtx(i) + v[v.size()-1].data_x)*(y - v[v.size()-1].data_y)/(cmapx2dtx(x) - v[v.size()-1].data_x);
@@ -1150,10 +1171,7 @@ int CMedit::interp_linear_onePoint(int x, float y, std::vector<contPoint> v, flo
 		for (int i=1; i<v.size(); i++) {
 			if(cmapx2dtx(x) >= v[i-1].data_x && cmapx2dtx(x) <= v[i].data_x) {
 printf("Middle\n");
-// printf("First Half:\n");
-// printf("%d: %f\n",j, arr[j] );
-				// }
-				if(v[i-1].data_x <= DISP_XMIN) {
+				if(v[i-1].data_x < DISP_XMIN) {
 					for (int j=0; j<= cmapx2dtx(x); j++) {
 						arr[j] = v[i-1].data_y + (cmapx2dtx(j) + v[i-1].data_x) *(y - v[i-1].data_y)/(cmapx2dtx(x) - v[i-1].data_x);
 					}
@@ -1176,8 +1194,7 @@ printf("Middle\n");
 						arr[j] = y + cmapx2dtx(j-x)*(v[i].data_y - y)/(v[i].data_x - cmapx2dtx(x));
 					}
 				}
-// printf("Second Half:\n");
-// printf("%d: %f\n",j, arr[j] );
+
 				break;
 			}
 		}
@@ -1185,10 +1202,6 @@ printf("Middle\n");
 	return 0;
 }
 
-
-// void CMedit::interp_linear_between2() {
-// 	return;
-// }
 
 // **** Virtual Funcs: draw(), resize() and handle() END
 
@@ -1503,14 +1516,6 @@ void CMedit::init() {
 	comments = (char **)malloc( maxcomments * sizeof(char *) );
 
 	init_contPoints();
-	// for(int k = 0; k < cment_; k++) {
-	// 	vh[k] = 1 - .5*k / cment_;
-	// 	vs[k] = .5;
-	// 	vb[k] = .25 + .75*k / cment_;
-	// 	alpha[k] = .33 + .67 * k*k / (cment_*cment_);
-	// }
-
-
 
 	snapshot();
 }

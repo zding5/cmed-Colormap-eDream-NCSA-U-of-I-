@@ -1,0 +1,109 @@
+-- Future Development Suggestion:
+	
+	- Potential Bugs:
+		Due to time, there exist some sections untested that may contain potential bugs. I will list below what I know so far and which sections of code to look at and what can be the problem/fix.
+
+		1) Zooming might cause interpolated lines to display funny: the control points should be properly stored in terms of data coordinates, but while zooming/moving the histogram, interpolated lines can look off place.
+
+			Possible places to look at (CMedit.C):
+				- interp_for_scaling(), which adjusts color entry values when zooming/moving happens. The way it works here is that the function treats every control point in store as if it is just added and use function interp_liner_onePoint(...) to change the color entry values.
+				- interp_linear_onePoint(...) handles linear interpolation when a new click happens under interpolation mode.
+
+		2) Adding control points outside of current color map range: seems to be working, but might contain display problems the same reason for Zooming problems.
+
+		3) Undo/Redo does not work with the new implementation. Needs fix.
+
+			Possible places to look at (CMedit.C):
+				- sample()
+				- snapshot()
+				- undo()
+				- redo()
+
+		4) The small text boxes which used to show which color entry the cursor at is not working. Look into report_cb() in cmed.C and functions called in CMedit.C
+
+	- Redundance:
+
+		1) cment_ and cmapw() should serve the same purpose, representing the total number of color entries according to window width. cmapw() is recommended to be kept since cment_ needs updated constantly.
+
+		2) Contains potential repeated code in interpolation related functions.
+
+	- Next Steps:
+		Some functionalities that are good to have and can be a natural next step built upon the current system.
+
+		1) Output new colormap files: Neccesary information is already stored in
+			std::vector<contPoint> HUE_con_points;
+			std::vector<contPoint> SAT_con_points;
+			std::vector<contPoint> BRI_con_points;
+			std::vector<contPoint> ALP_con_points;
+			Only need to write an output function and a read in function.
+
+		2) UI redesign: for obvious reasons.
+
+		3) Editing, Deleting and Reset all for control points.
+
+
+The following is an overview for the program. Can be good reference for future developer.
+
+
+-- Overview:
+
+	- Coordinate Systems:
+	
+		1) Window Coords: (wx, wy)
+
+			The coordinates of the fltk window, given by fltk functions.
+
+		2) Drawing Coords: (drx, dry)
+
+			The coordinates for our drawing area, defined x: 0.0 to 1.0; y: 0.0 to 1.0.
+
+		3) Data Coords: (dtx, dty)
+
+			The coordinates for data (displayed as histograms) we read in, defined x to be x-data range and y to be y-data range.
+
+			When there's no read in data, the x and y are set to range 0.0 to 1.0.
+
+		4) Colormap Coords: (cdtx, cdty)
+
+			The coordinates for the range of data we want colormap to apply to.
+
+			By default, it is set to the same as Data Coords.
+
+			Also, (mainly for Y axis) if we want to separate alpha scaling from other colors, we need 2 sets of Y coordinates.
+
+			Under current design, each pixel wide should has one color entry, making continuous color lines.
+
+		5) Display Coords:
+
+			i) For x: 
+
+				The coordinates for histograms and colormap shown. This can help us decide which part of the histograms (along with corresponding colormaps we want to display in the drawing area).
+
+				The coordinate range is a subset of x Data range (data x coords).
+
+				By default, it is set to the same as Data Coords.
+
+			ii) For y:
+
+				A little different because we have separate coords for histograms and colormap. This is for us to implement zooming effects respectively on histograms and on colormap.
+
+				a) The coordinate range for colormap is a subset of y Data range (data y coords) and by default, it is set to the same as Data Coords.
+
+				b) The coordinate range for histogram is a subset of y Data range (data y coords) and by default, it is set to the same as Data Coords.
+
+
+	- Zooming mechanism:
+
+		Change the value of data_x_min_for_display_ and data_x_min_for_display_ to zoom/move the histogram. The zooming is symmetrical relative to the central line.
+
+	- Interpolation mechanism:
+
+		Two things happen when clicked:
+
+			1) Add a control point to the corresponding vector: HUE_con_points, SAT_con_points, BRI_con_points, ALP_con_points.
+
+			2) Changing the color entry values to interpolated values.
+
+				- vh,vb,vs,alpha always starts with the first pixel wide column in the drawing area, aka, vh[0] contains the value of the 0 color entry in drawing area always.
+
+				- Line parts outside of the drawing area are not rendered or calculated. We only use control points to interpolate for line parts visible.

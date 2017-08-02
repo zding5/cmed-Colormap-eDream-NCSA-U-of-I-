@@ -491,8 +491,8 @@ void lerp_cb( Fl_Slider *sl, void * ) {
 }
 
 void rgbmode_cb( Fl_Button *btn, void * ) {
-  static char *btnlbl[2] = { "RGB", "HSB" };
-  static char *hsblbls[3][2] = {
+  static const char *btnlbl[2] = { "RGB", "HSB" };
+  static const char *hsblbls[3][2] = {
 		{ "Red(L)", "Hue(L)" },
 		{ "Green(M)", "Sat(M)" },
 		{ "Blue(R)", "Bright(R)" } };
